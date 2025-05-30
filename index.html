@@ -6,42 +6,137 @@
     <title>Consulta de IMEI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* Define a fonte padrão para o corpo e uma cor de fundo suave */
+        /* Define a fonte padrão para o corpo e uma cor de fundo suave para o modo claro */
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f3f4f6; /* Tailwind gray-100 */
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* Garante que o rodapé fique no final da página */
+        }
+        /* Estilos para o modo noturno: aplicados apenas quando a classe 'dark' está no <html> */
+        html.dark body {
+            background-color: #1a202c; /* Tailwind gray-900 */
+        }
+        html.dark .bg-white {
+            background-color: #2d3748; /* Tailwind gray-800 */
+        }
+        html.dark .text-gray-800 {
+            color: #e2e8f0; /* Tailwind gray-200 */
+        }
+        html.dark .text-gray-700 {
+            color: #cbd5e0; /* Tailwind gray-300 */
+        }
+        html.dark .shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        html.dark .border {
+            border-color: #4a5568; /* Tailwind gray-600 */
+        }
+        html.dark .bg-gray-50 {
+            background-color: #2d3748; /* Tailwind gray-800 */
+        }
+        html.dark .border-gray-200 {
+            border-color: #4a5568; /* Tailwind gray-600 */
+        }
+        html.dark .text-gray-600 {
+            color: #a0aec0; /* Tailwind gray-400 */
+        }
+        html.dark .bg-yellow-50 {
+            background-color: #4a5568; /* Tailwind gray-600 */
+            border-color: #6b46c1; /* Tailwind purple-700 for contrast */
+        }
+        html.dark .text-yellow-800 {
+            color: #e2e8f0; /* Tailwind gray-200 */
+        }
+        html.dark .text-blue-700 {
+            color: #90cdf4; /* Tailwind blue-300 */
+        }
+        html.dark .bg-white.shadow-sm {
+            background-color: #2d3748; /* Tailwind gray-800 */
+            border-color: #4a5568; /* Tailwind gray-600 */
+        }
+        html.dark .text-orange-600 {
+            color: #fbd38d; /* Tailwind orange-300 */
+        }
+        html.dark .text-red-600 {
+            color: #feb2b2; /* Tailwind red-300 */
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
-    <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
-        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Consulta de IMEI</h1>
+<body class="transition-colors duration-300">
+    <main class="flex-grow flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md transition-colors duration-300">
+            <div class="flex justify-end mb-4">
+                <button id="darkModeToggle" class="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-300">
+                    <svg id="sunIcon" class="w-6 h-6 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h1M3 12h1m15.325-7.757l-.707-.707M4.343 19.071l-.707-.707M18.364 5.636l.707-.707M5.636 18.364l.707.707M12 18a6 6 0 100-12 6 6 0 000 12z"></path>
+                    </svg>
+                    <svg id="moonIcon" class="w-6 h-6 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                    </svg>
+                </button>
+            </div>
 
-        <div class="mb-4">
-            <label for="imeiInput" class="block text-gray-700 text-sm font-semibold mb-2">
-                Insira o número IMEI (15 dígitos):
-            </label>
-            <input
-                type="text"
-                id="imeiInput"
-                maxlength="15"
-                class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                placeholder="Ex: 123456789012345"
+            <h1 class="text-3xl font-bold text-center text-gray-800 dark:text-gray-200 mb-6 transition-colors duration-300">Consulta de IMEI</h1>
+
+            <div class="mb-4">
+                <label for="imeiInput" class="block text-gray-700 dark:text-gray-300 text-sm font-semibold mb-2 transition-colors duration-300">
+                    Insira o número IMEI (15 dígitos):
+                </label>
+                <input
+                    type="text"
+                    id="imeiInput"
+                    maxlength="15"
+                    class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                    placeholder="Ex: 123456789012345"
+                >
+            </div>
+
+            <button
+                id="checkImeiBtn"
+                class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-200 ease-in-out transform hover:scale-105"
             >
-        </div>
+                Consultar IMEI
+            </button>
 
-        <button
-            id="checkImeiBtn"
-            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-200 ease-in-out transform hover:scale-105"
-        >
-            Consultar IMEI
-        </button>
-
-        <div id="results" class="mt-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
-            <p class="text-gray-600 text-sm italic text-center">Os resultados aparecerão aqui.</p>
+            <div id="results" class="mt-8 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 transition-colors duration-300">
+                <p class="text-gray-600 dark:text-gray-400 text-sm italic text-center transition-colors duration-300">Os resultados aparecerão aqui.</p>
+            </div>
         </div>
-    </div>
+    </main>
+
+    <footer class="w-full py-6 text-center text-gray-600 dark:text-gray-400 transition-colors duration-300">
+        <p class="mb-4">© 2025 Eduardo André Campos. Todos os direitos reservados.</p>
+        <div class="flex justify-center space-x-4">
+            <a href="#" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300" aria-label="Facebook">
+                <i class="fab fa-facebook-f text-2xl"></i>
+            </a>
+            <a href="#" class="text-gray-700 dark:text-gray-300 hover:text-pink-600 dark:hover:text-pink-400 transition-colors duration-300" aria-label="Instagram">
+                <i class="fab fa-instagram text-2xl"></i>
+            </a>
+            <a href="#" class="text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-300 transition-colors duration-300" aria-label="Telegram">
+                <i class="fab fa-telegram-plane text-2xl"></i>
+            </a>
+            <a href="#" class="text-gray-700 dark:text-gray-300 hover:text-green-500 dark:hover:text-green-300 transition-colors duration-300" aria-label="WhatsApp">
+                <i class="fab fa-whatsapp text-2xl"></i>
+            </a>
+            <a href="#" class="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-300" aria-label="GitHub">
+                <i class="fab fa-github text-2xl"></i>
+            </a>
+            <a href="#" class="text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 transition-colors duration-300" aria-label="GitLab">
+                <i class="fab fa-gitlab text-2xl"></i>
+            </a>
+            <a href="#" class="text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-500 transition-colors duration-300" aria-label="LinkedIn">
+                <i class="fab fa-linkedin-in text-2xl"></i>
+            </a>
+            <a href="mailto:seu.email@example.com" class="text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-300" aria-label="E-mail">
+                <i class="fas fa-envelope text-2xl"></i>
+            </a>
+        </div>
+    </footer>
 
     <script>
         // JavaScript para validação e geração de IMEI
@@ -49,6 +144,25 @@
             const imeiInput = document.getElementById('imeiInput');
             const checkImeiBtn = document.getElementById('checkImeiBtn');
             const resultsDiv = document.getElementById('results');
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            const htmlElement = document.documentElement; // O elemento <html>
+
+            // Verifica a preferência de tema do usuário no localStorage
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                htmlElement.classList.add('dark');
+            }
+
+            // Adiciona um ouvinte de evento para o botão de alternância de modo noturno
+            darkModeToggle.addEventListener('click', () => {
+                htmlElement.classList.toggle('dark'); // Adiciona ou remove a classe 'dark' no <html>
+                // Salva a preferência do usuário no localStorage
+                if (htmlElement.classList.contains('dark')) {
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    localStorage.setItem('theme', 'light');
+                }
+            });
 
             /**
              * Valida um número IMEI usando o algoritmo de Luhn.
@@ -121,7 +235,7 @@
 
                 // Verifica se o IMEI tem o comprimento correto (15 dígitos)
                 if (imei.length !== 15) {
-                    resultsDiv.innerHTML = '<p class="text-red-600 text-center">Por favor, insira um IMEI de 15 dígitos.</p>';
+                    resultsDiv.innerHTML = '<p class="text-red-600 dark:text-red-300 text-center transition-colors duration-300">Por favor, insira um IMEI de 15 dígitos.</p>';
                     return;
                 }
 
@@ -130,10 +244,9 @@
                     // IMEI original de 15 dígitos é válido pelo Luhn
                     displayResult(imei, true, false); // isLuhnValid=true, wasCorrected=false
                     resultsDiv.innerHTML += `
-                        <div class="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                            <p class="text-yellow-800 text-sm font-medium">
+                        <div class="mt-6 p-4 bg-yellow-50 dark:bg-gray-600 rounded-lg border border-yellow-200 dark:border-purple-700 transition-colors duration-300">
+                            <p class="text-yellow-800 dark:text-gray-200 text-sm font-medium text-center transition-colors duration-300">
                                 <strong>Atenção:</strong> Devido a políticas de segurança do navegador (CORS) e medidas anti-bot do site imei.info, não é possível realizar consultas automáticas diretamente daqui.
-                                Por favor, clique no link acima para verificar manualmente o IMEI no site imei.info.
                                 Um IMEI é considerado "válido" quando o site imei.info exibe informações do aparelho em vez de uma mensagem de erro.
                             </p>
                         </div>
@@ -145,7 +258,7 @@
                     const correctedImei = imeiPrefix + String(correctChecksum); // Constrói o IMEI corrigido
 
                     resultsDiv.innerHTML = `
-                        <p class="text-orange-600 text-center mb-4">
+                        <p class="text-orange-600 dark:text-orange-300 text-center mb-4 transition-colors duration-300">
                             O IMEI inserido (<span class="font-mono font-bold">${imei}</span>) é inválido.
                             O dígito verificador foi corrigido.
                         </p>
@@ -154,10 +267,9 @@
                     displayResult(correctedImei, true, true);
 
                     resultsDiv.innerHTML += `
-                        <div class="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                            <p class="text-yellow-800 text-sm font-medium">
+                        <div class="mt-6 p-4 bg-yellow-50 dark:bg-gray-600 rounded-lg border border-yellow-200 dark:border-purple-700 transition-colors duration-300">
+                            <p class="text-yellow-800 dark:text-gray-200 text-sm font-medium text-center transition-colors duration-300">
                                 <strong>Atenção:</strong> Devido a políticas de segurança do navegador (CORS) e medidas anti-bot do site imei.info, não é possível realizar consultas automáticas diretamente daqui.
-                                Por favor, clique no link acima para verificar manualmente o IMEI corrigido no site imei.info.
                                 Um IMEI é considerado "válido" quando o site imei.info exibe informações do aparelho em vez de uma mensagem de erro.
                             </p>
                         </div>
@@ -173,27 +285,31 @@
              */
             function displayResult(imei, isLuhnValid, wasCorrected) {
                 const imeiInfoUrl = `https://www.imei.info/?imei=${imei}`; // URL para consulta no imei.info
-                let statusText = '';
-                if (isLuhnValid && wasCorrected) {
-                    statusText = ' (Corrigido e Válido - Luhn)';
-                } else if (isLuhnValid) {
-                    statusText = ' (Válido - Luhn)';
-                } else {
-                    // Esta condição não deve ser alcançada com a lógica atual, mas é mantida para robustez.
-                    statusText = ' (Inválido - Luhn)';
-                }
 
                 const resultItem = document.createElement('div');
-                resultItem.className = 'mb-3 p-3 border border-gray-300 rounded-lg bg-white shadow-sm';
-                resultItem.innerHTML = `
-                    <p class="text-gray-800 font-semibold mb-2">IMEI: <span class="font-mono text-blue-700">${imei}</span>${statusText}</p>
+                // Adicionado text-center para centralizar o conteúdo
+                resultItem.className = 'mb-3 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 shadow-sm transition-colors duration-300 text-center';
+
+                let contentHtml = `<p class="text-gray-800 dark:text-gray-200 font-semibold mb-2 transition-colors duration-300">IMEI Válido: <span class="font-mono text-blue-700 dark:text-blue-300">${imei}</span></p>`;
+
+                // A informação sobre o dígito verificador corrigido não será mais exibida aqui,
+                // pois já é informada antes da exibição do resultado principal.
+                // if (wasCorrected) {
+                //     contentHtml += `<p class="text-sm text-orange-500 dark:text-orange-300 mb-2">Dígito verificador corrigido.</p>`;
+                // }
+
+                contentHtml += `
                     <a href="${imeiInfoUrl}" target="_blank" rel="noopener noreferrer"
-                       class="inline-block bg-green-500 hover:bg-green-600 text-white text-sm font-bold py-2 px-4 rounded-lg transition duration-200 ease-in-out">
+                       class="inline-block mx-auto bg-green-500 hover:bg-green-600 text-white text-sm font-bold py-2 px-4 rounded-lg transition duration-200 ease-in-out text-center w-fit">
                         Verificar no imei.info
                         <svg class="inline-block w-4 h-4 ml-2 -mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                     </a>
                 `;
+                resultItem.innerHTML = contentHtml;
                 resultsDiv.appendChild(resultItem); // Adiciona o item de resultado à div de resultados
+
+                // Redirecionamento automático
+                window.open(imeiInfoUrl, '_blank');
             }
         });
     </script>
