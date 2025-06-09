@@ -3,315 +3,653 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consulta de IMEI</title>
+    <title>IMEI Checker - Festa Junina Digital</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* Define a fonte padrão para o corpo e uma cor de fundo suave para o modo claro */
+        /* Fonte temática e fundo padrão */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6; /* Tailwind gray-100 */
+            background: radial-gradient(ellipse at top, #ff8a00 0%, #e52e71 50%, #9b59b6 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .titulo-festa {
+            font-family: 'Fredoka One', cursive;
+        }
+
+        /* Padrão xadrez animado */
+        .fundo-xadrez {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%),
+                linear-gradient(-45deg, rgba(255,255,255,0.1) 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.1) 75%),
+                linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.1) 75%);
+            background-size: 60px 60px;
+            background-position: 0 0, 0 30px, 30px -30px, -30px 0px;
+            animation: mover-xadrez 20s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes mover-xadrez {
+            0% { transform: translateX(0) translateY(0); }
+            100% { transform: translateX(60px) translateY(60px); }
+        }
+
+        /* Balões flutuantes */
+        .baloes {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .balao {
+            position: absolute;
+            font-size: 2rem;
+            animation: flutuar 6s ease-in-out infinite;
+        }
+
+        .balao:nth-child(1) { left: 10%; animation-delay: 0s; color: #ff6b6b; }
+        .balao:nth-child(2) { left: 20%; animation-delay: 1s; color: #4ecdc4; }
+        .balao:nth-child(3) { left: 70%; animation-delay: 2s; color: #45b7d1; }
+        .balao:nth-child(4) { left: 80%; animation-delay: 3s; color: #f9ca24; }
+
+        @keyframes flutuar {
+            0%, 100% { transform: translateY(100vh) rotate(0deg); }
+            50% { transform: translateY(-100px) rotate(180deg); }
+        }
+
+        /* Card principal com tema de barraca de festa */
+        .barraca-festa {
+            background: linear-gradient(145deg, #ffffff 0%, #f8f9ff 100%);
+            border: 4px solid #ff6b6b;
+            border-radius: 25px;
+            box-shadow: 
+                0 20px 40px rgba(0,0,0,0.1),
+                inset 0 1px 0 rgba(255,255,255,0.6);
+            position: relative;
+            backdrop-filter: blur(20px);
+        }
+
+        .barraca-festa::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: -4px;
+            right: -4px;
+            height: 30px;
+            background: repeating-linear-gradient(
+                90deg,
+                #ff6b6b 0px,
+                #ff6b6b 40px,
+                #4ecdc4 40px,
+                #4ecdc4 80px,
+                #f9ca24 80px,
+                #f9ca24 120px,
+                #45b7d1 120px,
+                #45b7d1 160px
+            );
+            border-radius: 15px 15px 0 0;
+            z-index: -1;
+        }
+
+        .barraca-festa::after {
+            content: '🎪';
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2.5rem;
+            background: white;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
             display: flex;
-            flex-direction: column;
-            min-height: 100vh; /* Garante que o rodapé fique no final da página */
+            align-items: center;
+            justify-content: center;
+            border: 4px solid #ff6b6b;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
-        /* Estilos para o modo noturno: aplicados apenas quando a classe 'dark' está no <html> */
+
+        /* Modo escuro com tema junino */
         html.dark body {
-            background-color: #1a202c; /* Tailwind gray-900 */
+            background: radial-gradient(ellipse at top, #2c1810 0%, #8b0000 50%, #4a0080 100%);
         }
-        html.dark .bg-white {
-            background-color: #2d3748; /* Tailwind gray-800 */
+
+        html.dark .barraca-festa {
+            background: linear-gradient(145deg, #1a202c 0%, #2d3748 100%);
+            border-color: #f56565;
         }
-        html.dark .text-gray-800 {
-            color: #e2e8f0; /* Tailwind gray-200 */
+
+        html.dark .barraca-festa::before {
+            background: repeating-linear-gradient(
+                90deg,
+                #f56565 0px,
+                #f56565 40px,
+                #38b2ac 40px,
+                #38b2ac 80px,
+                #ecc94b 80px,
+                #ecc94b 120px,
+                #4299e1 120px,
+                #4299e1 160px
+            );
         }
-        html.dark .text-gray-700 {
-            color: #cbd5e0; /* Tailwind gray-300 */
+
+        html.dark .barraca-festa::after {
+            background: #2d3748;
+            border-color: #f56565;
         }
-        html.dark .shadow {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
+        html.dark .text-gray-800 { color: #e2e8f0; }
+        html.dark .text-gray-700 { color: #cbd5e0; }
+        html.dark .text-gray-600 { color: #a0aec0; }
+        html.dark .bg-gray-50 { background-color: #2d3748; }
+        html.dark .border-gray-200 { border-color: #4a5568; }
+        html.dark .bg-yellow-50 { background-color: #744210; }
+        html.dark .text-yellow-800 { color: #faf089; }
+        html.dark .text-blue-700 { color: #90cdf4; }
+        html.dark .text-orange-600 { color: #f6ad55; }
+        html.dark .text-red-600 { color: #fc8181; }
+
+        /* Input estilizado */
+        .input-festa {
+            background: linear-gradient(145deg, #ffffff, #f7fafc);
+            border: 3px solid transparent;
+            background-clip: padding-box;
+            box-shadow: 
+                0 0 0 3px rgba(255, 107, 107, 0.1),
+                inset 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        html.dark .border {
-            border-color: #4a5568; /* Tailwind gray-600 */
+
+        .input-festa:focus {
+            box-shadow: 
+                0 0 0 3px rgba(255, 107, 107, 0.4),
+                0 10px 25px rgba(255, 107, 107, 0.15);
+            transform: translateY(-2px);
         }
-        html.dark .bg-gray-50 {
-            background-color: #2d3748; /* Tailwind gray-800 */
+
+        html.dark .input-festa {
+            background: linear-gradient(145deg, #2d3748, #4a5568);
+            color: #e2e8f0;
         }
-        html.dark .border-gray-200 {
-            border-color: #4a5568; /* Tailwind gray-600 */
+
+        /* Botão principal temático */
+        .botao-festa {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 50%, #ff9ff3 100%);
+            border: none;
+            box-shadow: 
+                0 10px 30px rgba(255, 107, 107, 0.4),
+                inset 0 1px 0 rgba(255,255,255,0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
-        html.dark .text-gray-600 {
-            color: #a0aec0; /* Tailwind gray-400 */
+
+        .botao-festa::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.6s;
         }
-        html.dark .bg-yellow-50 {
-            background-color: #4a5568; /* Tailwind gray-600 */
-            border-color: #6b46c1; /* Tailwind purple-700 for contrast */
+
+        .botao-festa:hover::before {
+            left: 100%;
         }
-        html.dark .text-yellow-800 {
-            color: #e2e8f0; /* Tailwind gray-200 */
+
+        .botao-festa:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(255, 107, 107, 0.5);
         }
-        html.dark .text-blue-700 {
-            color: #90cdf4; /* Tailwind blue-300 */
+
+        .botao-festa:active {
+            transform: translateY(-1px) scale(0.98);
         }
-        html.dark .bg-white.shadow-sm {
-            background-color: #2d3748; /* Tailwind gray-800 */
-            border-color: #4a5568; /* Tailwind gray-600 */
+
+        /* Toggle modo escuro estilizado */
+        .toggle-festa {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: 2px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
         }
-        html.dark .text-orange-600 {
-            color: #fbd38d; /* Tailwind orange-300 */
+
+        .toggle-festa:hover {
+            transform: rotate(180deg) scale(1.1);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
         }
-        html.dark .text-red-600 {
-            color: #feb2b2; /* Tailwind red-300 */
+
+        /* Área de resultados temática */
+        .resultado-festa {
+            background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,249,255,0.8) 100%);
+            border: 2px dashed #ff6b6b;
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        html.dark .resultado-festa {
+            background: linear-gradient(135deg, rgba(45,55,72,0.9) 0%, rgba(74,85,104,0.8) 100%);
+            border-color: #f56565;
+        }
+
+        /* Fogos de artifício */
+        .fogos {
+            position: fixed;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .fogo {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            animation: explodir 2s ease-out infinite;
+        }
+
+        @keyframes explodir {
+            0% {
+                transform: scale(0) rotate(0deg);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1) rotate(180deg);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(0) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Milho dançante */
+        .milho-dancante {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            font-size: 3rem;
+            animation: dancar 2s ease-in-out infinite;
+            z-index: 50;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .milho-dancante:hover {
+            transform: scale(1.3) rotate(360deg);
+        }
+
+        @keyframes dancar {
+            0%, 100% { transform: rotate(-10deg) translateY(0px); }
+            25% { transform: rotate(10deg) translateY(-10px); }
+            50% { transform: rotate(-5deg) translateY(-20px); }
+            75% { transform: rotate(5deg) translateY(-10px); }
+        }
+
+        /* Footer temático */
+        .footer-festa {
+            background: linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(139,0,0,0.9) 100%);
+            backdrop-filter: blur(15px);
+            border-top: 3px solid #ff6b6b;
+            position: relative;
+        }
+
+        .footer-festa::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 0;
+            right: 0;
+            height: 10px;
+            background: repeating-linear-gradient(
+                90deg,
+                #ff6b6b 0px,
+                #ff6b6b 20px,
+                #4ecdc4 20px,
+                #4ecdc4 40px,
+                #f9ca24 40px,
+                #f9ca24 60px
+            );
+        }
+
+        /* Animações dos ícones sociais */
+        .social-icon {
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .social-icon:hover {
+            transform: translateY(-8px) rotate(15deg) scale(1.2);
+        }
+
+        /* Responsividade */
+        @media (max-width: 640px) {
+            .barraca-festa {
+                margin: 20px;
+                border-radius: 20px;
+            }
+            
+            .titulo-festa {
+                font-size: 1.5rem;
+            }
+            
+            .balao {
+                font-size: 1.5rem;
+            }
         }
     </style>
 </head>
-<body class="transition-colors duration-300">
-    <main class="flex-grow flex items-center justify-center p-4">
-        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md transition-colors duration-300">
-            <div class="flex justify-end mb-4">
-                <button id="darkModeToggle" class="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-300">
-                    <svg id="sunIcon" class="w-6 h-6 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<body class="transition-colors duration-500">
+    <!-- Fundo xadrez animado -->
+    <div class="fundo-xadrez"></div>
+    
+    <!-- Balões flutuantes -->
+<div class="baloes">
+    <div class="balao">🎈</div>
+    <div class="balao">🎉</div>
+    <div class="balao">🔥</div>
+    <div class="balao">🌽</div>
+    <div class="balao">🍢</div>
+    <div class="balao">🪕</div>
+    <div class="balao">🧺</div>
+    <div class="balao">🎶</div>
+    <div class="balao">🕺</div>
+    <div class="balao">💃</div>
+    <div class="balao">🎩</div>
+    <div class="balao">🌾</div>
+    <div class="balao">🍺</div>
+    <div class="balao">🪁</div>
+    <div class="balao">🪵</div>
+    <div class="balao">🍭</div>
+    <div class="balao">🥥</div>
+    <div class="balao">🍠</div>
+    <div class="balao">🎯</div>
+    <div class="balao">🧑‍🌾</div>
+</div>
+
+    
+    <!-- Milho dançante -->
+    <div class="milho-dancante" onclick="criarFogos()">🌽</div>
+    
+    <!-- Fogos de artifício -->
+    <div class="fogos" id="fogos"></div>
+
+    <main class="min-h-screen flex items-center justify-center p-4 relative z-10">
+        <div class="barraca-festa p-8 w-full max-w-lg transition-all duration-500">
+            <!-- Toggle modo escuro -->
+            <div class="flex justify-end mb-6">
+                <button id="darkModeToggle" class="toggle-festa p-3 rounded-full text-white focus:outline-none focus:ring-4 focus:ring-purple-300">
+                    <svg id="sunIcon" class="w-6 h-6 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h1M3 12h1m15.325-7.757l-.707-.707M4.343 19.071l-.707-.707M18.364 5.636l.707-.707M5.636 18.364l.707.707M12 18a6 6 0 100-12 6 6 0 000 12z"></path>
                     </svg>
-                    <svg id="moonIcon" class="w-6 h-6 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <svg id="moonIcon" class="w-6 h-6 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
                     </svg>
                 </button>
             </div>
 
-            <h1 class="text-3xl font-bold text-center text-gray-800 dark:text-gray-200 mb-6 transition-colors duration-300">Consulta de IMEI</h1>
-
-            <div class="mb-4">
-                <label for="imeiInput" class="block text-gray-700 dark:text-gray-300 text-sm font-semibold mb-2 transition-colors duration-300">
-                    Insira o número IMEI (15 dígitos):
-                </label>
-                <input
-                    type="text"
-                    id="imeiInput"
-                    maxlength="15"
-                    class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                    placeholder="Ex: 123456789012345"
-                >
+            <!-- Título principal -->
+            <div class="text-center mb-8">
+                <h1 class="titulo-festa text-4xl font-bold text-gray-800 dark:text-white mb-2 transition-colors duration-300">
+                    Consulta de IMEI
+                </h1>
+                <div class="flex items-center justify-center gap-2 text-lg font-semibold text-pink-600 dark:text-pink-300">
+                    <span>🎊</span>
+                    <span>Festa Junina Digital</span>
+                    <span>🎊</span>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">Arraiá Tecnológico 2025</p>
             </div>
 
-            <button
-                id="checkImeiBtn"
-                class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-200 ease-in-out transform hover:scale-105"
-            >
-                Consultar IMEI
-            </button>
+            <!-- Formulário -->
+            <div class="space-y-6">
+                <div>
+                    <label for="imeiInput" class="block text-gray-700 dark:text-gray-300 text-sm font-semibold mb-3 flex items-center gap-2">
+                        <span>📱</span>
+                        <span>Digite o número IMEI (15 dígitos):</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="imeiInput"
+                        maxlength="15"
+                        class="input-festa w-full py-4 px-4 text-gray-700 dark:text-gray-200 rounded-xl focus:outline-none font-mono text-lg"
+                        placeholder="123456789012345"
+                    >
+                </div>
 
-            <div id="results" class="mt-8 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 transition-colors duration-300">
-                <p class="text-gray-600 dark:text-gray-400 text-sm italic text-center transition-colors duration-300">Os resultados aparecerão aqui.</p>
+                <button
+                    id="checkImeiBtn"
+                    class="botao-festa w-full py-4 px-6 text-white font-bold text-lg rounded-xl focus:outline-none relative z-10"
+                >
+                    <span class="flex items-center justify-center gap-3">
+                        <span>🔍</span>
+                        <span>Consultar no Arraiá</span>
+                        <span>🎯</span>
+                    </span>
+                </button>
+            </div>
+
+            <!-- Área de resultados -->
+            <div id="results" class="resultado-festa mt-8 p-6 rounded-xl transition-all duration-300">
+                <div class="text-center text-gray-600 dark:text-gray-400">
+                    <div class="text-3xl mb-2">🎪</div>
+                    <p class="text-sm italic">Aguardando consulta na festa junina...</p>
+                </div>
             </div>
         </div>
     </main>
 
-    <footer class="w-full py-6 text-center text-gray-600 dark:text-gray-400 transition-colors duration-300">
-        <p class="mb-4">© 2025 Eduardo André Campos. Todos os direitos reservados.</p>
-        <div class="flex justify-center space-x-4">
-            <a href="#" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300" aria-label="Facebook">
-                <i class="fab fa-facebook-f text-2xl"></i>
-            </a>
-            <a href="#" class="text-gray-700 dark:text-gray-300 hover:text-pink-600 dark:hover:text-pink-400 transition-colors duration-300" aria-label="Instagram">
-                <i class="fab fa-instagram text-2xl"></i>
-            </a>
-            <a href="#" class="text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-300 transition-colors duration-300" aria-label="Telegram">
-                <i class="fab fa-telegram-plane text-2xl"></i>
-            </a>
-            <a href="#" class="text-gray-700 dark:text-gray-300 hover:text-green-500 dark:hover:text-green-300 transition-colors duration-300" aria-label="WhatsApp">
-                <i class="fab fa-whatsapp text-2xl"></i>
-            </a>
-            <a href="#" class="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-300" aria-label="GitHub">
-                <i class="fab fa-github text-2xl"></i>
-            </a>
-            <a href="#" class="text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 transition-colors duration-300" aria-label="GitLab">
-                <i class="fab fa-gitlab text-2xl"></i>
-            </a>
-            <a href="#" class="text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-500 transition-colors duration-300" aria-label="LinkedIn">
-                <i class="fab fa-linkedin-in text-2xl"></i>
-            </a>
-            <a href="mailto:seu.email@example.com" class="text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-300" aria-label="E-mail">
-                <i class="fas fa-envelope text-2xl"></i>
-            </a>
+    <!-- Footer -->
+    <footer class="footer-festa text-white py-8 text-center relative">
+        <div class="max-w-4xl mx-auto px-4">
+            <div class="mb-6">
+                <h3 class="text-xl font-bold mb-2 flex items-center justify-center gap-2">
+                    <span>🎭</span>
+                    <span>Eduardo André Campos</span>
+                    <span>🎭</span>
+                </h3>
+                <p class="text-sm opacity-90">Desenvolvedor do Arraiá Tecnológico</p>
+                <p class="text-xs opacity-75 mt-1">© 2025 - Todos os direitos reservados na festa!</p>
+            </div>
+            
+            <div class="flex justify-center space-x-6 flex-wrap gap-4">
+                <a href="#" class="social-icon text-white hover:text-blue-300" aria-label="Facebook">
+                    <i class="fab fa-facebook-f text-2xl"></i>
+                </a>
+                <a href="#" class="social-icon text-white hover:text-pink-300" aria-label="Instagram">
+                    <i class="fab fa-instagram text-2xl"></i>
+                </a>
+                <a href="#" class="social-icon text-white hover:text-cyan-300" aria-label="Telegram">
+                    <i class="fab fa-telegram-plane text-2xl"></i>
+                </a>
+                <a href="#" class="social-icon text-white hover:text-green-300" aria-label="WhatsApp">
+                    <i class="fab fa-whatsapp text-2xl"></i>
+                </a>
+                <a href="#" class="social-icon text-white hover:text-gray-300" aria-label="GitHub">
+                    <i class="fab fa-github text-2xl"></i>
+                </a>
+                <a href="#" class="social-icon text-white hover:text-orange-300" aria-label="GitLab">
+                    <i class="fab fa-gitlab text-2xl"></i>
+                </a>
+                <a href="#" class="social-icon text-white hover:text-blue-400" aria-label="LinkedIn">
+                    <i class="fab fa-linkedin-in text-2xl"></i>
+                </a>
+                <a href="mailto:seu.email@example.com" class="social-icon text-white hover:text-red-300" aria-label="E-mail">
+                    <i class="fas fa-envelope text-2xl"></i>
+                </a>
+            </div>
         </div>
     </footer>
 
     <script>
-        // JavaScript para validação e geração de IMEI
+        // Funcionalidade completa mantida do código original
         document.addEventListener('DOMContentLoaded', () => {
             const imeiInput = document.getElementById('imeiInput');
             const checkImeiBtn = document.getElementById('checkImeiBtn');
             const resultsDiv = document.getElementById('results');
             const darkModeToggle = document.getElementById('darkModeToggle');
-            const htmlElement = document.documentElement; // O elemento <html>
+            const htmlElement = document.documentElement;
 
-            // Verifica a preferência de tema do usuário no localStorage
+            // Tema escuro
             const savedTheme = localStorage.getItem('theme');
             if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 htmlElement.classList.add('dark');
             }
 
-            // Adiciona um ouvinte de evento para o botão de alternância de modo noturno
             darkModeToggle.addEventListener('click', () => {
-                htmlElement.classList.toggle('dark'); // Adiciona ou remove a classe 'dark' no <html>
-                // Salva a preferência do usuário no localStorage
-                if (htmlElement.classList.contains('dark')) {
-                    localStorage.setItem('theme', 'dark');
-                } else {
-                    localStorage.setItem('theme', 'light');
-                }
+                htmlElement.classList.toggle('dark');
+                localStorage.setItem('theme', htmlElement.classList.contains('dark') ? 'dark' : 'light');
             });
 
-            /**
-             * Valida um número IMEI usando o algoritmo de Luhn.
-             * O algoritmo de Luhn é usado para validar números de identificação.
-             * @param {string} imei O número IMEI a ser validado (deve ter 15 dígitos).
-             * @returns {boolean} True se o IMEI for válido, false caso contrário.
-             */
+            // Validação Luhn (mantida integralmente)
             function validateLuhn(imei) {
-                // Verifica se o IMEI é nulo, vazio ou não tem 15 dígitos
-                if (!imei || imei.length !== 15) {
-                    return false;
-                }
-
-                let sum = 0;
-                let double = false; // Flag para dobrar o dígito
-
-                // Itera sobre os dígitos do IMEI da direita para a esquerda
+                if (!imei || imei.length !== 15) return false;
+                let sum = 0, double = false;
                 for (let i = imei.length - 1; i >= 0; i--) {
-                    let digit = parseInt(imei.charAt(i), 10); // Converte o caractere para inteiro
-
-                    if (double) {
-                        digit *= 2; // Dobra o dígito
-                        if (digit > 9) {
-                            digit -= 9; // Se o dígito dobrado for maior que 9, subtrai 9 (ex: 12 -> 1+2=3)
-                        }
-                    }
-                    sum += digit; // Adiciona o dígito (modificado ou não) à soma total
-                    double = !double; // Alterna a flag para o próximo dígito
-                }
-
-                // Um número Luhn válido tem uma soma total divisível por 10
-                return (sum % 10) === 0;
-            }
-
-            /**
-             * Calcula o dígito verificador (checksum) de Luhn para um prefixo de IMEI de 14 dígitos.
-             * @param {string} prefix O prefixo de 14 dígitos do IMEI.
-             * @returns {number} O dígito verificador correto (de 0 a 9).
-             */
-            function calculateLuhnChecksum(prefix) {
-                let sum = 0;
-                // A flag 'double' começa como true porque o último dígito do prefixo (14º dígito do IMEI completo)
-                // é o que seria dobrado se um 15º dígito de verificação fosse anexado.
-                let double = true;
-
-                for (let i = prefix.length - 1; i >= 0; i--) {
-                    let digit = parseInt(prefix.charAt(i), 10);
-
+                    let digit = parseInt(imei.charAt(i), 10);
                     if (double) {
                         digit *= 2;
-                        if (digit > 9) {
-                            digit -= 9;
-                        }
+                        if (digit > 9) digit -= 9;
                     }
                     sum += digit;
                     double = !double;
                 }
-
-                // O dígito verificador é o número que faz com que (soma + dígito verificador) seja divisível por 10.
-                // checksum = (10 - (sum % 10)) % 10
-                const checksum = (10 - (sum % 10)) % 10;
-                return checksum;
+                return (sum % 10) === 0;
             }
 
-            // Adiciona um ouvinte de evento para o clique do botão de consulta
-            checkImeiBtn.addEventListener('click', () => {
-                const rawImei = imeiInput.value.trim(); // Obtém o valor do input e remove espaços em branco
-                const imei = rawImei.replace(/\D/g, ''); // Remove todos os caracteres não numéricos do IMEI
-                resultsDiv.innerHTML = ''; // Limpa os resultados anteriores na div de resultados
+            function calculateLuhnChecksum(prefix) {
+                let sum = 0, double = true;
+                for (let i = prefix.length - 1; i >= 0; i--) {
+                    let digit = parseInt(prefix.charAt(i), 10);
+                    if (double) {
+                        digit *= 2;
+                        if (digit > 9) digit -= 9;
+                    }
+                    sum += digit;
+                    double = !double;
+                }
+                return (10 - (sum % 10)) % 10;
+            }
 
-                // Verifica se o IMEI tem o comprimento correto (15 dígitos)
+            // Event listener principal
+            checkImeiBtn.addEventListener('click', () => {
+                const rawImei = imeiInput.value.trim();
+                const imei = rawImei.replace(/\D/g, '');
+                resultsDiv.innerHTML = '';
+
                 if (imei.length !== 15) {
-                    resultsDiv.innerHTML = '<p class="text-red-600 dark:text-red-300 text-center transition-colors duration-300">Por favor, insira um IMEI de 15 dígitos.</p>';
+                    resultsDiv.innerHTML = `
+                        <div class="text-center text-red-500 dark:text-red-400">
+                            <div class="text-3xl mb-2">❌</div>
+                            <p class="font-semibold">Ops! IMEI incompleto na festa!</p>
+                            <p class="text-sm mt-1">Por favor, digite exatamente 15 dígitos</p>
+                        </div>
+                    `;
                     return;
                 }
 
-                // Valida o IMEI de 15 dígitos usando o algoritmo de Luhn
                 if (validateLuhn(imei)) {
-                    // IMEI original de 15 dígitos é válido pelo Luhn
-                    displayResult(imei, true, false); // isLuhnValid=true, wasCorrected=false
-                    resultsDiv.innerHTML += `
-                        <div class="mt-6 p-4 bg-yellow-50 dark:bg-gray-600 rounded-lg border border-yellow-200 dark:border-purple-700 transition-colors duration-300">
-                            <p class="text-yellow-800 dark:text-gray-200 text-sm font-medium text-center transition-colors duration-300">
-                                <strong>Atenção:</strong> Devido a políticas de segurança do navegador (CORS) e medidas anti-bot do site imei.info, não é possível realizar consultas automáticas diretamente daqui.
-                                Um IMEI é considerado "válido" quando o site imei.info exibe informações do aparelho em vez de uma mensagem de erro.
-                            </p>
-                        </div>
-                    `;
+                    displayResult(imei, true, false);
+                    showWarning();
                 } else {
-                    // IMEI original de 15 dígitos é inválido, tentar corrigir o dígito verificador
-                    const imeiPrefix = imei.substring(0, 14); // Pega os primeiros 14 dígitos
-                    const correctChecksum = calculateLuhnChecksum(imeiPrefix); // Calcula o dígito verificador correto
-                    const correctedImei = imeiPrefix + String(correctChecksum); // Constrói o IMEI corrigido
+                    const imeiPrefix = imei.substring(0, 14);
+                    const correctChecksum = calculateLuhnChecksum(imeiPrefix);
+                    const correctedImei = imeiPrefix + String(correctChecksum);
 
                     resultsDiv.innerHTML = `
-                        <p class="text-orange-600 dark:text-orange-300 text-center mb-4 transition-colors duration-300">
-                            O IMEI inserido (<span class="font-mono font-bold">${imei}</span>) é inválido.
-                            O dígito verificador foi corrigido.
-                        </p>
-                    `;
-                    // Exibe o IMEI corrigido, indicando que é válido pelo Luhn e que foi corrigido
-                    displayResult(correctedImei, true, true);
-
-                    resultsDiv.innerHTML += `
-                        <div class="mt-6 p-4 bg-yellow-50 dark:bg-gray-600 rounded-lg border border-yellow-200 dark:border-purple-700 transition-colors duration-300">
-                            <p class="text-yellow-800 dark:text-gray-200 text-sm font-medium text-center transition-colors duration-300">
-                                <strong>Atenção:</strong> Devido a políticas de segurança do navegador (CORS) e medidas anti-bot do site imei.info, não é possível realizar consultas automáticas diretamente daqui.
-                                Um IMEI é considerado "válido" quando o site imei.info exibe informações do aparelho em vez de uma mensagem de erro.
-                            </p>
+                        <div class="text-center text-orange-500 dark:text-orange-400 mb-6">
+                            <div class="text-3xl mb-2">🔧</div>
+                            <p class="font-semibold">IMEI corrigido na oficina da festa!</p>
+                            <p class="text-sm mt-1">Original: <span class="font-mono">${imei}</span></p>
+                            <p class="text-sm">Corrigido: <span class="font-mono font-bold">${correctedImei}</span></p>
                         </div>
                     `;
+                    displayResult(correctedImei, true, true);
+                    showWarning();
                 }
             });
 
-            /**
-             * Adiciona um item de resultado à div de resultados.
-             * @param {string} imei O IMEI a ser exibido.
-             * @param {boolean} isLuhnValid Indica se o IMEI é válido pelo algoritmo de Luhn.
-             * @param {boolean} wasCorrected Indica se o IMEI foi corrigido.
-             */
             function displayResult(imei, isLuhnValid, wasCorrected) {
-                const imeiInfoUrl = `https://www.imei.info/?imei=${imei}`; // URL para consulta no imei.info
-
+                const imeiInfoUrl = `https://www.imei.info/?imei=${imei}`;
+                
                 const resultItem = document.createElement('div');
-                // Adicionado text-center para centralizar o conteúdo
-                resultItem.className = 'mb-3 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 shadow-sm transition-colors duration-300 text-center';
-
-                let contentHtml = `<p class="text-gray-800 dark:text-gray-200 font-semibold mb-2 transition-colors duration-300">IMEI Válido: <span class="font-mono text-blue-700 dark:text-blue-300">${imei}</span></p>`;
-
-                // A informação sobre o dígito verificador corrigido não será mais exibida aqui,
-                // pois já é informada antes da exibição do resultado principal.
-                // if (wasCorrected) {
-                //     contentHtml += `<p class="text-sm text-orange-500 dark:text-orange-300 mb-2">Dígito verificador corrigido.</p>`;
-                // }
-
-                contentHtml += `
-                    <a href="${imeiInfoUrl}" target="_blank" rel="noopener noreferrer"
-                       class="inline-block mx-auto bg-green-500 hover:bg-green-600 text-white text-sm font-bold py-2 px-4 rounded-lg transition duration-200 ease-in-out text-center w-fit">
-                        Verificar no imei.info
-                        <svg class="inline-block w-4 h-4 ml-2 -mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                    </a>
+                resultItem.className = 'bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border-2 border-green-300 dark:border-green-600 mt-4';
+                
+                resultItem.innerHTML = `
+                    <div class="text-center">
+                        <div class="text-4xl mb-3">🎉</div>
+                        <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">IMEI Validado!</h3>
+                        <p class="font-mono text-lg text-blue-600 dark:text-blue-400 mb-4">${imei}</p>
+                        <a href="${imeiInfoUrl}" target="_blank" rel="noopener noreferrer"
+                           class="inline-flex items-center gap-2 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg">
+                            <span>🌐</span>
+                            <span>Verificar no imei.info</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                            </svg>
+                        </a>
+                    </div>
                 `;
-                resultItem.innerHTML = contentHtml;
-                resultsDiv.appendChild(resultItem); // Adiciona o item de resultado à div de resultados
-
-                // Redirecionamento automático
+                
+                resultsDiv.appendChild(resultItem);
                 window.open(imeiInfoUrl, '_blank');
+                criarFogos();
+            }
+
+            function showWarning() {
+                const warningDiv = document.createElement('div');
+                warningDiv.className = 'mt-6 p-4 bg-yellow-50 dark:bg-yellow-900 border-2 border-yellow-300 dark:border-yellow-600 rounded-xl';
+                warningDiv.innerHTML = `
+                    <div class="flex items-start gap-3">
+                        <span class="text-2xl">⚠️</span>
+                        <div class="text-yellow-800 dark:text-yellow-200 text-sm">
+                            <p class="font-semibold mb-1">Aviso Importante da Festa:</p>
+                            <p>Devido às políticas de segurança (CORS) e medidas anti-bot do imei.info, consultas automáticas não são possíveis diretamente desta página. O IMEI é válido quando o site exibe informações do aparelho ao invés de erro.</p>
+                        </div>
+                    </div>
+                `;
+                resultsDiv.appendChild(warningDiv);
             }
         });
+
+        // Função para criar fogos de artifício
+        function criarFogos() {
+            const fogosContainer = document.getElementById('fogos');
+            const cores = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#a8e6cf', '#ffd93d'];
+            
+            for (let i = 0; i < 15; i++) {
+                const fogo = document.createElement('div');
+                fogo.className = 'fogo';
+                fogo.style.backgroundColor = cores[Math.floor(Math.random() * cores.length)];
+                fogo.style.left = Math.random() * window.innerWidth + 'px';
+                fogo.style.top = Math.random() * window.innerHeight + 'px';
+                fogo.style.animationDelay = Math.random() * 1 + 's';
+                
+                fogosContainer.appendChild(fogo);
+                
+                setTimeout(() => {
+                    fogo.remove();
+                }, 2000);
+            }
+        }
+
+        // Criar fogos automaticamente de vez em quando
+        setInterval(() => {
+            if (Math.random() < 0.3) criarFogos();
+        }, 5000);
     </script>
 </body>
 </html>
