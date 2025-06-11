@@ -284,7 +284,6 @@
                     </div>
 
                     <!-- Panels "Em construção" -->
-                    <div id="consulta-numero-panel" class="hidden content-panel"><h3 class="text-3xl font-bold text-slate-800">Consulta numero</h3><div class="mt-6 p-6 main-panel-card"><h4 class="text-2xl font-semibold text-slate-700">Em construção</h4><p class="text-slate-500 mt-2">Esta funcionalidade incrível será implementada em breve.</p></div></div>
                     <div id="chamados-panel" class="hidden content-panel"><h3 class="text-3xl font-bold text-slate-800">Consultar Chamados</h3><div class="mt-6 p-6 main-panel-card"><h4 class="text-2xl font-semibold text-slate-700">Em construção</h4><p class="text-slate-500 mt-2">Esta funcionalidade incrível será implementada em breve.</p></div></div>
                     <div id="ba-panel" class="hidden content-panel"><h3 class="text-3xl font-bold text-slate-800">Consultar Boletim de Anormalidade (BA)</h3><div class="mt-6 p-6 main-panel-card"><h4 class="text-2xl font-semibold text-slate-700">Em construção</h4><p class="text-slate-500 mt-2">Esta funcionalidade incrível será implementada em breve.</p></div></div>
                     <div id="homologados-panel" class="hidden content-panel"><h3 class="text-3xl font-bold text-slate-800">Consultar Homologados</h3><div class="mt-6 p-6 main-panel-card"><h4 class="text-2xl font-semibold text-slate-700">Em construção</h4><p class="text-slate-500 mt-2">Esta funcionalidade incrível será implementada em breve.</p></div></div>
@@ -423,6 +422,33 @@
                         </div>
                     </div>
                     <!-- FIM: Painel Máscara de Atendimento -->
+
+                     <!-- INÍCIO: Painel Consulta numero -->
+                    <div id="consulta-numero-panel" class="hidden content-panel">
+                        <h3 class="text-3xl font-bold text-slate-800">Consulta numero</h3>
+                        <p class="text-slate-500 mt-2 mb-4">Insira um ou mais números para consultar.</p>
+                        <div class="mt-6 p-6 main-panel-card">
+                            <form id="consulta-numero-form">
+                                <div id="numero-fields-container" class="space-y-4">
+                                    <!-- Campo de número inicial -->
+                                    <div class="flex items-center gap-4">
+                                        <input type="text" name="numero[]" placeholder="Digite o número" class="w-full px-4 py-3 rounded-lg focus:outline-none transition form-input">
+                                    </div>
+                                </div>
+                                
+                                <div class="flex flex-col sm:flex-row gap-4 mt-4">
+                                     <button type="button" id="add-numero-field-btn" class="w-full sm:w-auto py-3 px-5 action-button bg-slate-600 hover:bg-slate-700 whitespace-nowrap">
+                                        + Adicionar Campo
+                                    </button>
+                                    <button type="submit" class="w-full py-3 action-button">
+                                        Consultar Números
+                                    </button>
+                                </div>
+                            </form>
+                            <div id="consulta-numero-results" class="mt-6 hidden"></div>
+                        </div>
+                    </div>
+                    <!-- FIM: Painel Consulta numero -->
 
                 </div>
             </main>
@@ -1057,6 +1083,46 @@
                     }, 3000);
                 });
             }
+
+            // --- INÍCIO: LÓGICA DA CONSULTA DE NÚMERO ---
+            const consultaNumeroPanel = document.getElementById('consulta-numero-panel');
+            if (consultaNumeroPanel) {
+                const consultaNumeroForm = document.getElementById('consulta-numero-form');
+                const numeroFieldsContainer = document.getElementById('numero-fields-container');
+                const addNumeroFieldBtn = document.getElementById('add-numero-field-btn');
+                const consultaNumeroResults = document.getElementById('consulta-numero-results');
+
+                addNumeroFieldBtn.addEventListener('click', () => {
+                    const newFieldDiv = document.createElement('div');
+                    newFieldDiv.className = 'flex items-center gap-4';
+                    
+                    const newInput = document.createElement('input');
+                    newInput.type = 'text';
+                    newInput.name = 'numero[]';
+                    newInput.placeholder = 'Digite o número';
+                    newInput.className = 'w-full px-4 py-3 rounded-lg focus:outline-none transition form-input';
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.type = 'button';
+                    removeBtn.className = 'p-2 text-red-500 hover:text-red-700 transition-colors';
+                    removeBtn.innerHTML = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+                    removeBtn.addEventListener('click', () => {
+                        newFieldDiv.remove();
+                    });
+                    
+                    newFieldDiv.appendChild(newInput);
+                    newFieldDiv.appendChild(removeBtn);
+                    numeroFieldsContainer.appendChild(newFieldDiv);
+                });
+
+                consultaNumeroForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    consultaNumeroResults.innerHTML = createAlert('Esta funcionalidade será implementada em breve.', 'info');
+                    consultaNumeroResults.classList.remove('hidden');
+                });
+            }
+            // --- FIM: LÓGICA DA CONSULTA DE NÚMERO ---
+
 
             // --- HELPER ---
             function createAlert(message, type = 'info') {
