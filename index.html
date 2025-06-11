@@ -497,34 +497,41 @@
 
             // --- IMEI LOGIC ---
             const imeiForm = document.getElementById('imei-form');
-            if(imeiForm) {
+            if (imeiForm) {
                 const imeiInput = document.getElementById('imei-input');
                 const imeiResults = document.getElementById('imei-results');
 
                 const isValidLuhn = (imei) => {
                     if (!/^\d{15}$/.test(imei)) return false;
-                    const sum = Array.from(imei, Number)
-                        .reduce((acc, digit, i) => {
-                            if ((imei.length - i) % 2 === 0) {
-                                digit *= 2;
-                                if (digit > 9) digit -= 9;
+                    let sum = 0;
+                    for (let i = 0; i < 15; i++) {
+                        let digit = parseInt(imei[i], 10);
+                        if ((15 - i) % 2 === 0) {
+                            digit *= 2;
+                            if (digit > 9) {
+                                digit -= 9;
                             }
-                            return acc + digit;
-                        }, 0);
+                        }
+                        sum += digit;
+                    }
                     return sum % 10 === 0;
                 };
 
                 const correctLuhn = (imeiBase) => {
                     const base = imeiBase.slice(0, 14);
                     if (base.length !== 14) return null;
-                    let sum = Array.from(base, Number)
-                        .reduce((acc, digit, i) => {
-                             if ((base.length - i) % 2 !== 0) {
-                                digit *= 2;
-                                if (digit > 9) digit -= 9;
+
+                    let sum = 0;
+                    for (let i = 0; i < 14; i++) {
+                        let digit = parseInt(base[i], 10);
+                        if (i % 2 !== 0) { 
+                            digit *= 2;
+                            if (digit > 9) {
+                                digit -= 9;
                             }
-                            return acc + digit;
-                        }, 0);
+                        }
+                        sum += digit;
+                    }
                     const checkDigit = (10 - (sum % 10)) % 10;
                     return base + checkDigit;
                 };
@@ -539,20 +546,22 @@
                         return;
                     }
 
-                    let finalImei = imei;
+                    let finalImei = '';
                     let message = '';
-                    
-                    if (imei.length === 15) {
-                        if (isValidLuhn(imei)) {
-                            message = `<p class="font-semibold text-green-600">IMEI válido: ${finalImei}</p>`;
+                    const isOriginallyValid = imei.length === 15 && isValidLuhn(imei);
+
+                    if (isOriginallyValid) {
+                        finalImei = imei;
+                        message = `<p class="font-semibold text-green-600">IMEI válido: ${finalImei}</p>`;
+                    } else {
+                        const corrected = correctLuhn(imei);
+                        if (corrected) {
+                            finalImei = corrected;
+                            message = `<p class="font-semibold text-orange-600">IMEI corrigido para: ${finalImei}</p>`;
                         } else {
-                            imeiResults.innerHTML = createAlert('O dígito verificador do IMEI de 15 dígitos é inválido.', 'error');
+                            imeiResults.innerHTML = createAlert('Não foi possível corrigir o IMEI informado.', 'error');
                             return;
                         }
-                    } else { // length is 14
-                        const corrected = correctLuhn(imei);
-                        finalImei = corrected;
-                        message = `<p class="font-semibold text-orange-600">IMEI corrigido para: ${finalImei}</p>`;
                     }
                     
                     const redirectUrl = `https://www.imei.info/?imei=${finalImei}`;
