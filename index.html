@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -63,24 +62,67 @@
             box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
             border: 1px solid #e2e8f0; /* border-slate-200 */
         }
-        input, select {
+        /* Estilos base para inputs para manter consistência */
+        .form-input {
            background-color: #f1f5f9; /* bg-slate-100 */
-           border-color: #cbd5e1; /* border-slate-300 */
+           border: 1px solid #cbd5e1; /* border-slate-300 */
            color: #334155; /* text-slate-700 */
         }
-        input:focus, select:focus {
+        .form-input:focus {
             --tw-ring-color: #f97316; /* ring-orange-500 */
             border-color: #f97316;
         }
-        .footer-festa {
-            background-color: #1e293b; /* bg-slate-800 */
-            border-top: 1px solid #334155; /* border-slate-700 */
+        input[readonly].form-input {
+            background-color: #e2e8f0; /* bg-slate-200 */
+            cursor: not-allowed;
         }
-        .social-icon {
-            transition: transform 0.3s ease, color 0.3s ease;
+        select:disabled.form-input {
+             background-color: #e2e8f0; /* bg-slate-200 */
+            cursor: not-allowed;
+            opacity: 0.7;
         }
-        .social-icon:hover {
-            transform: scale(1.2);
+        .alert-dismissible {
+            position: relative;
+            padding-right: 3rem;
+        }
+        .alert-dismissible .close-button {
+            position: absolute;
+            top: 50%;
+            right: 1rem;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: inherit;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .alert-dismissible .close-button:hover {
+            opacity: 1;
+        }
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
+        }
+        .faq-answer.open {
+            max-height: 500px; /* Adjust as needed */
+            padding-top: 0.75rem;
+            padding-bottom: 0.75rem;
+        }
+        .system-card {
+            transition: all 0.3s ease-in-out;
+        }
+        .system-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+         #notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
         }
     </style>
 </head>
@@ -91,27 +133,71 @@
         <div class="fixed inset-y-0 left-0 z-30 flex flex-col w-64 overflow-y-auto transition duration-300 transform -translate-x-full sidebar lg:translate-x-0 lg:static lg:inset-0" id="sidebar">
             <div class="flex items-center justify-center flex-shrink-0 mt-8">
                 <div class="flex items-center">
-                    <!-- Logo Image -->
                     <img src="favicon-brisanet.png" alt="BrisaTel Logo" class="w-10 h-10">
                     <span class="ml-3 text-2xl font-bold text-white">BrisaTel</span>
                 </div>
             </div>
-            <nav class="mt-12 flex-1" id="nav-menu">
-                <a class="sidebar-link flex items-center px-6 py-3 mt-4 text-slate-200 active" href="#" data-target="imei">
+            <nav class="mt-10 flex-1" id="nav-menu">
+                <span class="px-6 py-2 text-xs font-bold tracking-wider text-slate-500 uppercase">Ferramentas</span>
+                <a class="sidebar-link flex items-center px-6 py-3 mt-2 text-slate-200 active" href="#" data-target="imei">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-1.096.904-2.39.904-3.732a8 8 0 10-14.708 4.28c.16.05.32.1.48.15"></path></svg>
                     <span class="mx-4">Consultar IMEI</span>
                 </a>
-                <a class="sidebar-link flex items-center px-6 py-3 mt-4 text-slate-400" href="#" data-target="dispositivo">
+                <a class="sidebar-link flex items-center px-6 py-3 mt-2 text-slate-400" href="#" data-target="dispositivo">
                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
                     <span class="mx-4">Consultar Dispositivo</span>
                 </a>
-                <a class="sidebar-link flex items-center px-6 py-3 mt-4 text-slate-400" href="#" data-target="portabilidade">
+                <a class="sidebar-link flex items-center px-6 py-3 mt-2 text-slate-400" href="#" data-target="portabilidade">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
                     <span class="mx-4">Consultar Portabilidade</span>
                 </a>
-                <a class="sidebar-link flex items-center px-6 py-3 mt-4 text-slate-400" href="#" data-target="consulta-numero">
+                <a class="sidebar-link flex items-center px-6 py-3 mt-2 text-slate-400" href="#" data-target="consulta-numero">
                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
-                    <span class="mx-4">Consulta de Número</span>
+                    <span class="mx-4">Consulta numero</span>
+                </a>
+                 <a class="sidebar-link flex items-center px-6 py-3 mt-2 text-slate-400" href="#" data-target="mascara-atendimento">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    <span class="mx-4">Máscara de Atendimento</span>
+                </a>
+                <a class="sidebar-link flex items-center px-6 py-3 mt-2 text-slate-400" href="#" data-target="brisa-keep">
+                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+                    <span class="mx-4">Brisa Keep</span>
+                </a>
+
+                <span class="px-6 py-2 mt-4 text-xs font-bold tracking-wider text-slate-500 uppercase">Consultas</span>
+                 <a class="sidebar-link flex items-center px-6 py-3 mt-2 text-slate-400" href="#" data-target="chamados">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path></svg>
+                    <span class="mx-4">Consultar Chamados</span>
+                </a>
+                 <a class="sidebar-link flex items-center px-6 py-3 mt-2 text-slate-400" href="#" data-target="ba">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    <span class="mx-4">Consultar BA</span>
+                </a>
+                <a class="sidebar-link flex items-center px-6 py-3 mt-2 text-slate-400" href="#" data-target="homologados">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span class="mx-4">Consultar Homologados</span>
+                </a>
+                <a class="sidebar-link flex items-center px-6 py-3 mt-2 text-slate-400" href="#" data-target="ramais">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                    <span class="mx-4">Consultar Ramais</span>
+                </a>
+
+                <span class="px-6 py-2 mt-4 text-xs font-bold tracking-wider text-slate-500 uppercase">Outros</span>
+                <a class="sidebar-link flex items-center px-6 py-3 mt-2 text-slate-400" href="#" data-target="melhorias">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                    <span class="mx-4">Solicitar Melhorias</span>
+                </a>
+                <a class="sidebar-link flex items-center px-6 py-3 mt-2 text-slate-400" href="#" data-target="faq">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.79 4 4 0 1.152-.448 2.203-1.175 2.975l-1.12 1.055a1 1 0 01-1.414 0l-1.12-1.055A4.002 4.002 0 018.228 9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21a9 9 0 100-18 9 9 0 000 18z"></path></svg>
+                    <span class="mx-4">FAQ</span>
+                </a>
+                <a class="sidebar-link flex items-center px-6 py-3 mt-2 text-slate-400" href="#" data-target="sistemas">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                    <span class="mx-4">Link Sistemas</span>
+                </a>
+                <a class="sidebar-link flex items-center px-6 py-3 mt-2 text-slate-400" href="#" data-target="planilhas">
+                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V7a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    <span class="mx-4">Link Planilhas</span>
                 </a>
             </nav>
         </div>
@@ -138,7 +224,7 @@
                         <div class="mt-6 p-6 main-panel-card">
                             <form id="imei-form">
                                 <label class="block text-sm font-medium text-slate-600">Número do IMEI</label>
-                                <input type="text" id="imei-input" placeholder="Digite o IMEI de 14 ou 15 dígitos" class="w-full px-4 py-3 mt-2 rounded-lg focus:outline-none transition" maxlength="15">
+                                <input type="text" id="imei-input" placeholder="Digite o IMEI de 14 ou 15 dígitos" class="w-full px-4 py-3 mt-2 rounded-lg focus:outline-none transition form-input" maxlength="15">
                                 <button type="submit" class="w-full py-3 action-button">Validar e Consultar</button>
                             </form>
                             <div id="imei-results" class="mt-6 hidden"></div>
@@ -153,7 +239,7 @@
                                 <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                                     <div>
                                         <label for="dispositivo-brand-select" class="block text-sm font-medium text-slate-600">Marca</label>
-                                        <select id="dispositivo-brand-select" class="w-full px-4 py-3 mt-2 rounded-lg focus:outline-none transition">
+                                        <select id="dispositivo-brand-select" class="w-full px-4 py-3 mt-2 rounded-lg focus:outline-none transition form-input">
                                                 <option>Samsung</option>
                                                 <option>Apple</option>
                                                 <option>Xiaomi</option>
@@ -175,7 +261,7 @@
                                     </div>
                                     <div>
                                         <label for="dispositivo-model-input" class="block text-sm font-medium text-slate-600">Modelo</label>
-                                        <input type="text" id="dispositivo-model-input" placeholder="Ex: Galaxy S24 Ultra" class="w-full px-4 py-3 mt-2 rounded-lg focus:outline-none transition">
+                                        <input type="text" id="dispositivo-model-input" placeholder="Ex: Galaxy S24 Ultra" class="w-full px-4 py-3 mt-2 rounded-lg focus:outline-none transition form-input">
                                     </div>
                                 </div>
                                 <button type="submit" class="w-full py-3 mt-6 action-button">Buscar</button>
@@ -190,22 +276,158 @@
                         <div class="mt-6 p-6 main-panel-card">
                             <form id="portabilidade-form">
                                 <label class="block text-sm font-medium text-slate-600">Número de Telefone</label>
-                                <input type="text" id="portabilidade-input" placeholder="(XX) XXXXX-XXXX" class="w-full px-4 py-3 mt-2 rounded-lg focus:outline-none transition">
+                                <input type="text" id="portabilidade-input" placeholder="(XX) XXXXX-XXXX" class="w-full px-4 py-3 mt-2 rounded-lg focus:outline-none transition form-input" maxlength="15">
                                 <button type="submit" class="w-full py-3 mt-4 action-button">Consultar</button>
                             </form>
                             <div id="portabilidade-results" class="mt-6 hidden"></div>
                         </div>
                     </div>
 
-                    <!-- Consulta de Número Panel -->
-                    <div id="consulta-numero-panel" class="hidden content-panel">
-                        <h3 class="text-3xl font-bold text-slate-800">Consulta de Número</h3>
+                    <!-- Panels "Em construção" -->
+                    <div id="consulta-numero-panel" class="hidden content-panel"><h3 class="text-3xl font-bold text-slate-800">Consulta numero</h3><div class="mt-6 p-6 main-panel-card"><h4 class="text-2xl font-semibold text-slate-700">Em construção</h4><p class="text-slate-500 mt-2">Esta funcionalidade incrível será implementada em breve.</p></div></div>
+                    <div id="chamados-panel" class="hidden content-panel"><h3 class="text-3xl font-bold text-slate-800">Consultar Chamados</h3><div class="mt-6 p-6 main-panel-card"><h4 class="text-2xl font-semibold text-slate-700">Em construção</h4><p class="text-slate-500 mt-2">Esta funcionalidade incrível será implementada em breve.</p></div></div>
+                    <div id="ba-panel" class="hidden content-panel"><h3 class="text-3xl font-bold text-slate-800">Consultar Boletim de Anormalidade (BA)</h3><div class="mt-6 p-6 main-panel-card"><h4 class="text-2xl font-semibold text-slate-700">Em construção</h4><p class="text-slate-500 mt-2">Esta funcionalidade incrível será implementada em breve.</p></div></div>
+                    <div id="homologados-panel" class="hidden content-panel"><h3 class="text-3xl font-bold text-slate-800">Consultar Homologados</h3><div class="mt-6 p-6 main-panel-card"><h4 class="text-2xl font-semibold text-slate-700">Em construção</h4><p class="text-slate-500 mt-2">Esta funcionalidade incrível será implementada em breve.</p></div></div>
+                    <div id="planilhas-panel" class="hidden content-panel"><h3 class="text-3xl font-bold text-slate-800">Link Planilhas</h3><div class="mt-6 p-6 main-panel-card"><h4 class="text-2xl font-semibold text-slate-700">Em construção</h4><p class="text-slate-500 mt-2">Esta funcionalidade incrível será implementada em breve.</p></div></div>
+
+                    <!-- INÍCIO: Painel de Melhorias -->
+                    <div id="melhorias-panel" class="hidden content-panel">
+                        <h3 class="text-3xl font-bold text-slate-800">Solicitar Melhorias</h3>
+                        <p class="text-slate-500 mt-2 mb-4">A sua opinião é muito importante para nós. Por favor, preencha o formulário abaixo.</p>
                         <div class="mt-6 p-6 main-panel-card">
-                            <h4 class="text-2xl font-semibold text-slate-700">Em construção</h4>
-                            <p class="text-slate-500 mt-2">Esta funcionalidade incrível será implementada em breve.</p>
+                            <form id="feedbackForm">
+                                <div class="mb-4">
+                                    <label for="userEmail" class="block text-sm font-medium text-slate-600 mb-2">O seu E-mail (para contato)</label>
+                                    <input type="email" id="userEmail" name="userEmail" placeholder="seu.email@exemplo.com" required class="w-full px-4 py-3 rounded-lg focus:outline-none transition form-input">
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="categoria" class="block text-sm font-medium text-slate-600 mb-2">Categoria</label>
+                                    <select id="categoria" name="categoria" required class="w-full px-4 py-3 rounded-lg focus:outline-none transition form-input">
+                                        <option value="" disabled selected>Selecione uma categoria...</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="tituloPadrao" class="block text-sm font-medium text-slate-600 mb-2">Tópico</label>
+                                    <select id="tituloPadrao" name="tituloPadrao" required disabled class="w-full px-4 py-3 rounded-lg focus:outline-none transition form-input">
+                                        <option value="">Selecione um tópico...</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="assuntoFinal" class="block text-sm font-medium text-slate-600 mb-2">Assunto Final do E-mail (automático)</label>
+                                    <input type="text" id="assuntoFinal" name="assuntoFinal" readonly class="w-full px-4 py-3 rounded-lg focus:outline-none transition form-input">
+                                </div>
+
+                                <div class="mb-6">
+                                    <label for="mensagem" class="block text-sm font-medium text-slate-600 mb-2">A sua Mensagem</label>
+                                    <textarea id="mensagem" name="mensagem" rows="6" placeholder="Descreva aqui a sua sugestão, relatório de erro ou feedback..." required class="w-full px-4 py-3 rounded-lg focus:outline-none transition form-input"></textarea>
+                                </div>
+
+                                <div>
+                                    <button type="submit" id="submitBtn" class="w-full py-3 action-button">Enviar Feedback</button>
+                                </div>
+                                
+                                <div id="statusMensagem" class="text-center mt-4 text-sm font-medium min-h-[20px]"></div>
+                            </form>
                         </div>
                     </div>
+                    <!-- FIM: Painel de Melhorias -->
+
+                    <!-- INÍCIO: Painel de FAQ -->
+                    <div id="faq-panel" class="hidden content-panel">
+                        <h3 class="text-3xl font-bold text-slate-800">FAQ - Perguntas Frequentes</h3>
+                        <p class="text-slate-500 mt-2 mb-4">Tire suas dúvidas sobre as tecnologias 5G e FWA.</p>
+                        <div class="mt-6 p-6 main-panel-card">
+                            <div id="faq-accordion">
+                                <!-- As perguntas e respostas serão injetadas aqui pelo JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- FIM: Painel de FAQ -->
+                    
+                    <!-- INÍCIO: Painel de Links de Sistemas -->
+                    <div id="sistemas-panel" class="hidden content-panel">
+                         <h3 class="text-3xl font-bold text-slate-800">Links para Sistemas</h3>
+                        <p class="text-slate-500 mt-2 mb-4">Acesso rápido aos principais sistemas e ferramentas internas.</p>
+                        <div id="sistemas-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-6">
+                            <!-- Os cartões de sistema serão injetados aqui -->
+                        </div>
+                    </div>
+                     <!-- FIM: Painel de Links de Sistemas -->
+                     
+                    <!-- INÍCIO: Painel de Ramais -->
+                    <div id="ramais-panel" class="hidden content-panel">
+                        <h3 class="text-3xl font-bold text-slate-800">Consultar Ramais</h3>
+                         <p class="text-slate-500 mt-2 mb-4">Busque ramais por cidade.</p>
+                        <div class="mt-6 p-6 main-panel-card">
+                            <div class="relative">
+                                <label for="city-search" class="block text-sm font-medium text-slate-600 mb-2">Digite o nome da cidade</label>
+                                <input type="text" id="city-search" placeholder="Ex: Fortaleza" class="w-full px-4 py-3 rounded-lg focus:outline-none transition form-input">
+                                <div id="city-suggestions" class="absolute z-10 w-full bg-white border border-slate-300 rounded-b-lg mt-1 max-h-60 overflow-y-auto hidden shadow-lg">
+                                    <!-- Sugestões de cidade aparecerão aqui -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- FIM: Painel de Ramais -->
+                    
+                    <!-- INÍCIO: Painel Brisa Keep -->
+                    <div id="brisa-keep-panel" class="hidden content-panel">
+                        <h3 class="text-3xl font-bold text-slate-800">Brisa Keep</h3>
+                        <p class="text-slate-500 mt-2 mb-4">Suas notas e lembretes rápidos.</p>
+                        
+                        <!-- Formulário de Nova Nota -->
+                        <div class="p-6 mb-8 main-panel-card">
+                            <form id="new-note-form">
+                                <input type="text" id="note-title" placeholder="Título" class="w-full px-4 py-3 mb-3 rounded-lg focus:outline-none transition form-input font-semibold">
+                                <textarea id="note-content" placeholder="Criar uma nota..." rows="3" class="w-full px-4 py-3 rounded-lg focus:outline-none transition form-input"></textarea>
+                                <button type="submit" class="w-full py-3 mt-4 action-button">Adicionar Nota</button>
+                            </form>
+                        </div>
+
+                        <!-- Grade de Notas -->
+                        <div id="notes-grid">
+                            <!-- As notas criadas aparecerão aqui -->
+                        </div>
+                    </div>
+                    <!-- FIM: Painel Brisa Keep -->
+                    
+                    <!-- INÍCIO: Painel Máscara de Atendimento -->
+                    <div id="mascara-atendimento-panel" class="hidden content-panel">
+                        <h3 class="text-3xl font-bold text-slate-800">Máscara de Atendimento</h3>
+                        <p class="text-slate-500 mt-2 mb-4">Refine textos técnicos para garantir clareza e formalidade.</p>
+
+                        <div id="mascara-input-container" class="main-panel-card p-6">
+                            <label for="mascara-input" class="block text-sm font-medium text-slate-600 mb-2">Texto Original</label>
+                            <textarea id="mascara-input" placeholder="Insira o texto para ser corrigido..." rows="10" class="w-full px-4 py-3 rounded-lg focus:outline-none transition form-input"></textarea>
+                            <button id="mascara-submit" class="w-full py-3 action-button">
+                                Refinar Texto
+                            </button>
+                            <div id="mascara-loading" class="hidden items-center justify-center mt-4">
+                               <svg class="animate-spin h-8 w-8 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </div>
+                            <div id="mascara-error" class="text-red-600 text-sm mt-2 text-center"></div>
+                        </div>
+
+                        <div id="mascara-output-container" class="hidden main-panel-card p-6">
+                            <label class="block text-sm font-medium text-slate-600 mb-2">Texto Refinado</label>
+                            <div id="mascara-output" class="p-4 bg-slate-100 rounded-lg text-slate-700 whitespace-pre-wrap min-h-[200px]"></div>
+                             <button id="copy-refined-text" class="w-full py-3 action-button">Copiar Texto</button>
+                             <button id="mascara-back-button" class="w-full py-3 action-button bg-slate-500 hover:bg-slate-600">Corrigir Novo Texto</button>
+                             <div id="mascara-copy-feedback" class="text-center text-sm text-green-600 mt-2"></div>
+                        </div>
+                    </div>
+                    <!-- FIM: Painel Máscara de Atendimento -->
+
                 </div>
+            </main>
+        </div>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -231,9 +453,13 @@
                     contentPanels.forEach(panel => {
                         panel.classList.add('hidden');
                     });
-                    document.getElementById(`${targetId}-panel`).classList.remove('hidden');
+                    
+                    const targetPanel = document.getElementById(`${targetId}-panel`);
+                    if (targetPanel) {
+                        targetPanel.classList.remove('hidden');
+                    }
 
-                    if(sidebar.classList.contains('lg:static')) {
+                    if (!sidebar.classList.contains('lg:static')) {
                          sidebar.classList.add('-translate-x-full');
                     }
                 });
@@ -245,123 +471,592 @@
 
             // --- IMEI LOGIC ---
             const imeiForm = document.getElementById('imei-form');
-            const imeiInput = document.getElementById('imei-input');
-            const imeiResults = document.getElementById('imei-results');
+            if(imeiForm) {
+                const imeiInput = document.getElementById('imei-input');
+                const imeiResults = document.getElementById('imei-results');
 
-            function isValidLuhn(imei) {
-                if (!/^\d{15}$/.test(imei)) return false;
-                let sum = 0;
-                for (let i = 0; i < 15; i++) {
-                    let digit = parseInt(imei[i], 10);
-                    if (i % 2 !== 0) {
-                        digit *= 2;
-                        if (digit > 9) {
-                            digit -= 9;
-                        }
-                    }
-                    sum += digit;
-                }
-                return sum % 10 === 0;
-            }
+                const isValidLuhn = (imei) => {
+                    if (!/^\d{15}$/.test(imei)) return false;
+                    const sum = Array.from(imei, Number)
+                        .reduce((acc, digit, i) => {
+                            if ((imei.length - i) % 2 === 0) {
+                                digit *= 2;
+                                if (digit > 9) digit -= 9;
+                            }
+                            return acc + digit;
+                        }, 0);
+                    return sum % 10 === 0;
+                };
 
-            function correctLuhn(imeiBase) {
-                const base = imeiBase.slice(0, 14);
-                for (let lastDigit = 0; lastDigit <= 9; lastDigit++) {
-                    const tempImei = base + lastDigit;
-                    if (isValidLuhn(tempImei)) {
-                        return tempImei;
-                    }
-                }
-                return null;
-            }
+                const correctLuhn = (imeiBase) => {
+                    const base = imeiBase.slice(0, 14);
+                    if (base.length !== 14) return null;
+                    let sum = Array.from(base, Number)
+                        .reduce((acc, digit, i) => {
+                             if ((base.length - i) % 2 !== 0) {
+                                digit *= 2;
+                                if (digit > 9) digit -= 9;
+                            }
+                            return acc + digit;
+                        }, 0);
+                    const checkDigit = (10 - (sum % 10)) % 10;
+                    return base + checkDigit;
+                };
 
-            imeiForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const imei = imeiInput.value.trim();
-
-                if (!/^\d{14,15}$/.test(imei)) {
-                    imeiResults.innerHTML = createAlert('Por favor, insira um IMEI com 14 ou 15 dígitos.', 'error');
+                imeiForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const imei = imeiInput.value.trim();
                     imeiResults.classList.remove('hidden');
-                    return;
-                }
-                
-                let finalImei = imei;
-                let message = '';
-                let isValid = false;
 
-                if (isValidLuhn(imei)) {
-                    isValid = true;
-                    message = `<p class="font-semibold text-green-600">IMEI válido: ${finalImei}</p>`;
-                } else {
-                    const corrected = correctLuhn(imei);
-                    if (corrected) {
-                        isValid = true;
-                        finalImei = corrected;
-                        message = `<p class="font-semibold text-orange-600">IMEI corrigido: ${finalImei}</p>`;
-                    } else {
-                        imeiResults.innerHTML = createAlert('Não foi possível validar ou corrigir o IMEI.', 'error');
-                        imeiResults.classList.remove('hidden');
+                    if (!/^\d{14,15}$/.test(imei)) {
+                        imeiResults.innerHTML = createAlert('Por favor, insira um IMEI com 14 ou 15 dígitos.', 'error');
                         return;
                     }
-                }
-                
-                if (isValid) {
+
+                    let finalImei = imei;
+                    let message = '';
+                    
+                    if (imei.length === 15) {
+                        if (isValidLuhn(imei)) {
+                            message = `<p class="font-semibold text-green-600">IMEI válido: ${finalImei}</p>`;
+                        } else {
+                            imeiResults.innerHTML = createAlert('O dígito verificador do IMEI de 15 dígitos é inválido.', 'error');
+                            return;
+                        }
+                    } else { // length is 14
+                        const corrected = correctLuhn(imei);
+                        finalImei = corrected;
+                        message = `<p class="font-semibold text-orange-600">IMEI corrigido para: ${finalImei}</p>`;
+                    }
+                    
                     const redirectUrl = `https://www.imei.info/?imei=${finalImei}`;
-                    const finalMessage = message + '<p class="mt-2 text-sm text-slate-500">Redirecionando para o IMEI.info em uma nova aba...</p>';
-                    imeiResults.innerHTML = finalMessage;
-                    imeiResults.classList.remove('hidden');
+                    imeiResults.innerHTML = message + '<p class="mt-2 text-sm text-slate-500">Redirecionando para o IMEI.info em uma nova aba...</p>';
                     imeiResults.classList.add('result-card');
                     window.open(redirectUrl, '_blank');
-                }
-            });
+                });
+            }
             
             // --- DISPOSITIVO LOGIC ---
             const dispositivoForm = document.getElementById('dispositivo-form');
-            const brandSelect = document.getElementById('dispositivo-brand-select');
-            const modelInput = document.getElementById('dispositivo-model-input');
-            const dispositivoResults = document.getElementById('dispositivo-results');
-            
-            dispositivoForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const brand = brandSelect.value.trim();
-                const model = modelInput.value.trim();
+            if(dispositivoForm) {
+                const brandSelect = document.getElementById('dispositivo-brand-select');
+                const modelInput = document.getElementById('dispositivo-model-input');
+                const dispositivoResults = document.getElementById('dispositivo-results');
                 
-                if (!model) {
-                    dispositivoResults.innerHTML = createAlert('Por favor, digite o modelo do aparelho.', 'error');
+                dispositivoForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const brand = brandSelect.value.trim();
+                    const model = modelInput.value.trim();
+                    
+                    if (!model) {
+                        dispositivoResults.innerHTML = createAlert('Por favor, digite o modelo do aparelho.', 'error');
+                        dispositivoResults.classList.remove('hidden');
+                        return;
+                    }
+                    
+                    const modelSlug = model.toLowerCase().replace(/\s+/g, '-');
+                    const brandSlug = brand.toLowerCase().replace(/\s+/g, '-');
+                    const modelQuery = model.replace(/\s+/g, '+');
+
+                    const kimovilUrl = `https://www.kimovil.com/pt/onde-comprar-${brandSlug}-${modelSlug}`;
+                    const maisCelularUrl = `https://www.maiscelular.com.br/fichas-tecnicas/${brandSlug}/${modelSlug}/`;
+                    const gsmArenaUrl = `https://www.gsmarena.com/res.php3?sSearch=${modelQuery}`;
+                    
+                    dispositivoResults.innerHTML = `
+                        <h4 class="text-xl font-semibold text-slate-700 border-b border-slate-200 pb-3 mb-4">Opções de Pesquisa para ${brand} ${model}</h4>
+                        <div class="flex flex-col md:flex-row gap-4 mt-4">
+                            <a href="${kimovilUrl}" target="_blank" class="action-button flex-1 text-center">Pesquisar no Kimovil</a>
+                            <a href="${maisCelularUrl}" target="_blank" class="action-button flex-1 text-center">Pesquisar no MaisCelular</a>
+                            <a href="${gsmArenaUrl}" target="_blank" class="action-button flex-1 text-center">Pesquisar no GSMArena</a>
+                        </div>
+                    `;
                     dispositivoResults.classList.remove('hidden');
-                    return;
-                }
-                
-                const modelSlug = model.toLowerCase().replace(/\s+/g, '-');
-                const brandSlug = brand.toLowerCase().replace(/\s+/g, '-');
-                const modelQuery = model.replace(/\s+/g, '+');
-
-                const kimovilUrl = `https://www.kimovil.com/pt/onde-comprar-${brandSlug}-${modelSlug}`;
-                const maisCelularUrl = `https://www.maiscelular.com.br/fichas-tecnicas/${brandSlug}/${modelSlug}/`;
-                const gsmArenaUrl = `https://www.gsmarena.com/res.php3?sSearch=${modelQuery}`;
-                
-                dispositivoResults.innerHTML = `
-                    <h4 class="text-xl font-semibold text-slate-700 border-b border-slate-200 pb-3 mb-4">Opções de Pesquisa para ${brand} ${model}</h4>
-                    <div class="flex flex-col md:flex-row gap-4 mt-4">
-                        <a href="${kimovilUrl}" target="_blank" class="action-button flex-1 text-center">Pesquisar no Kimovil</a>
-                        <a href="${maisCelularUrl}" target="_blank" class="action-button flex-1 text-center">Pesquisar no MaisCelular</a>
-                        <a href="${gsmArenaUrl}" target="_blank" class="action-button flex-1 text-center">Pesquisar no GSMArena</a>
-                    </div>
-                `;
-                dispositivoResults.classList.remove('hidden');
-                dispositivoResults.classList.add('result-card');
-            });
-
+                    dispositivoResults.classList.add('result-card');
+                });
+            }
 
             // --- PORTABILIDADE LOGIC ---
             const portabilidadeForm = document.getElementById('portabilidade-form');
-            const portabilidadeResults = document.getElementById('portabilidade-results');
+            if(portabilidadeForm) {
+                const portabilidadeInput = document.getElementById('portabilidade-input');
+                const portabilidadeResults = document.getElementById('portabilidade-results');
+                
+                portabilidadeInput.addEventListener('input', (e) => {
+                    let value = e.target.value.replace(/\D/g, '');
+                    value = value.replace(/^(\d{2})(\d)/g, '($1) $2');
+                    value = value.replace(/(\d{5})(\d)/, '$1-$2');
+                    e.target.value = value.slice(0, 15);
+                });
+
+                portabilidadeForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    portabilidadeResults.innerHTML = createAlert('Este serviço estará disponível em breve.', 'info');
+                    portabilidadeResults.classList.remove('hidden');
+                });
+            }
+
+            // --- LÓGICA DO FORMULÁRIO DE MELHORIAS ---
+            const feedbackForm = document.getElementById('feedbackForm');
+            if (feedbackForm) {
+                const categorias = {
+                    "Melhorias do Site": ["Sugestão de Nova Funcionalidade", "Proposta de Aprimoramento de Interface", "Ideia de Experiência do Usuário"],
+                    "Relatórios Técnicos": ["Problema de Carregamento de Página", "Bug no Formulário", "Incompatibilidade em Dispositivo Móvel"],
+                    "Conteúdo": ["Sugestão de Novo Artigo", "Correção de Informação", "Proposta de Tópico"],
+                    "Acessibilidade": ["Sugestão de Melhoria", "Relato de Barreira"],
+                    "Geral": ["Feedback Diverso", "Outros Comentários"]
+                };
+
+                const categoriaSelect = document.getElementById('categoria');
+                const tituloPadraoSelect = document.getElementById('tituloPadrao');
+                const assuntoFinalInput = document.getElementById('assuntoFinal');
+                const statusMensagem = document.getElementById('statusMensagem');
+
+                Object.keys(categorias).forEach(categoria => {
+                    const option = document.createElement('option');
+                    option.value = categoria;
+                    option.textContent = categoria;
+                    categoriaSelect.appendChild(option);
+                });
+
+                categoriaSelect.addEventListener('change', () => {
+                    const categoriaSelecionada = categoriaSelect.value;
+                    tituloPadraoSelect.innerHTML = '<option value="" disabled selected>Selecione um tópico...</option>';
+                    tituloPadraoSelect.disabled = true;
+                    assuntoFinalInput.value = '';
+
+                    if (categoriaSelecionada && categorias[categoriaSelecionada]) {
+                        categorias[categoriaSelecionada].forEach(titulo => {
+                            const option = document.createElement('option');
+                            option.value = titulo;
+                            option.textContent = titulo;
+                            tituloPadraoSelect.appendChild(option);
+                        });
+                        tituloPadraoSelect.disabled = false;
+                    }
+                });
+
+                tituloPadraoSelect.addEventListener('change', () => {
+                    if (categoriaSelect.value && tituloPadraoSelect.value) {
+                        assuntoFinalInput.value = `[${categoriaSelect.value}] ${tituloPadraoSelect.value}`;
+                    }
+                });
+
+                feedbackForm.addEventListener('submit', (event) => {
+                    event.preventDefault();
+                    const assunto = assuntoFinalInput.value;
+                    const mensagemUsuario = feedbackForm.mensagem.value;
+                    const emailUsuario = feedbackForm.userEmail.value;
+
+                    if (!assunto || !mensagemUsuario || !emailUsuario) {
+                        statusMensagem.textContent = 'Por favor, preencha todos os campos obrigatórios.';
+                        statusMensagem.className = 'text-center mt-4 text-sm font-medium min-h-[20px] text-red-600';
+                        return;
+                    }
+                    
+                    statusMensagem.textContent = 'Feedback enviado com sucesso! [Envio sendo implementado]';
+                    statusMensagem.className = 'text-center mt-4 text-sm font-medium min-h-[20px] text-green-600';
+
+                    feedbackForm.reset(); 
+                    tituloPadraoSelect.innerHTML = '<option value="">Selecione um tópico...</option>';
+                    tituloPadraoSelect.disabled = true;
+                    assuntoFinalInput.value = '';
+
+                    setTimeout(() => {
+                        statusMensagem.textContent = '';
+                        statusMensagem.className = 'text-center mt-4 text-sm font-medium min-h-[20px]';
+                    }, 5000); 
+                });
+            }
             
-            portabilidadeForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                portabilidadeResults.innerHTML = createAlert('Este serviço estará disponível em breve.', 'info');
-                portabilidadeResults.classList.remove('hidden');
-            });
+            // --- LÓGICA DO FAQ ---
+            const faqContainer = document.getElementById('faq-accordion');
+            if (faqContainer) {
+                 const faqData = [
+                    {
+                        question: 'O que é a tecnologia 5G?',
+                        answer: 'O 5G é a quinta geração de tecnologia de redes móveis. Ela oferece velocidades de conexão muito mais altas (até 100 vezes mais rápida que o 4G), latência (tempo de resposta) ultrabaixa e a capacidade de conectar um número massivo de dispositivos simultaneamente.'
+                    },
+                    {
+                        question: 'O que é FWA (Acesso Fixo Sem Fio)?',
+                        answer: 'FWA é uma forma de fornecer internet banda larga para locais fixos (como casas e empresas) usando redes sem fio, como o 5G, em vez de cabos físicos (como fibra óptica). Um roteador na sua casa capta o sinal 5G de uma torre próxima e distribui via Wi-Fi.'
+                    },
+                    {
+                        question: 'Qual a principal vantagem do FWA da Brisanet?',
+                        answer: 'A principal vantagem é a instalação rápida e sem cabos. Você recebe um roteador Wi-Fi 6 que só precisa ser ligado na tomada para começar a usar a internet 5G, sem necessidade de obras, furos na parede ou visita técnica demorada.'
+                    },
+                    {
+                        question: 'Preciso de um celular 5G para usar o FWA?',
+                        answer: 'Não. O FWA usa a rede 5G para receber o sinal da rua, mas distribui a internet para sua casa via Wi-Fi. Qualquer dispositivo com Wi-Fi (celular 4G, notebook, Smart TV, etc.) pode se conectar e aproveitar a alta velocidade.'
+                    },
+                    {
+                        question: 'A velocidade do 5G é realmente muito maior que a do 4G?',
+                        answer: 'Sim. O 5G pode atingir velocidades de gigabits por segundo (Gbps), enquanto o 4G tipicamente opera na faixa de megabits por segundo (Mbps). Isso significa downloads, uploads e streaming muito mais rápidos e fluidos.'
+                    },
+                    {
+                        question: 'O que é "baixa latência" e por que é importante?',
+                        answer: 'Latência é o tempo que um sinal leva para ir de um ponto a outro. A baixa latência do 5G (quase instantânea) é crucial para aplicações em tempo real, como jogos online sem lag, videochamadas de alta qualidade e futuras tecnologias como carros autônomos.'
+                    },
+                    {
+                        question: 'A internet FWA é boa para jogos online e streaming?',
+                        answer: 'Sim. Graças à alta velocidade e à baixa latência do 5G, o FWA é excelente para jogos online competitivos, streaming de vídeos em 4K/8K e para residências com muitos dispositivos conectados ao mesmo tempo, sem perda de qualidade.'
+                    },
+                    {
+                        question: 'Posso levar meu roteador FWA para outro endereço?',
+                        answer: 'O serviço FWA é projetado para um endereço fixo. Embora o roteador seja portátil dentro de casa para encontrar o melhor sinal, o serviço é habilitado para funcionar na localidade contratada. Para mudanças, é necessário contatar o suporte.'
+                    },
+                    {
+                        question: 'Como funciona a instalação da internet FWA?',
+                        answer: 'É extremamente simples. O roteador já vem pré-configurado. Basta conectar o aparelho na tomada em um local da casa com boa recepção de sinal (perto de uma janela, por exemplo) e seguir as instruções iniciais. Não há necessidade de cabos externos.'
+                    },
+                    {
+                        question: 'Qual a diferença entre FWA e Fibra Óptica?',
+                        answer: 'A principal diferença é o meio de entrega. A Fibra Óptica usa cabos de vidro para levar o sinal até sua casa, enquanto o FWA usa ondas de rádio (o sinal 5G). Ambas oferecem altíssimas velocidades, mas o FWA tem a vantagem da instalação sem fio e mais rápida.'
+                    },
+                    {
+                        question: 'Meu chip 4G vai funcionar na rede 5G da Brisanet?',
+                        answer: 'Seu celular com chip 4G continuará funcionando normalmente na rede da Brisanet, conectando-se à tecnologia 4G. Para usufruir da velocidade 5G no seu plano móvel, você precisa de um aparelho celular compatível com a tecnologia 5G.'
+                    },
+                    {
+                        question: 'A Brisanet já oferece 5G e FWA na minha cidade?',
+                        answer: 'A Brisanet está em constante expansão de sua rede 5G e FWA, prioritariamente na região Nordeste. A melhor forma de saber a disponibilidade é consultar diretamente no site da Brisanet ou em uma loja física.'
+                    }
+                ];
+
+                faqData.forEach(item => {
+                    const faqItem = document.createElement('div');
+                    faqItem.className = 'border-b border-slate-200 last:border-b-0';
+                    faqItem.innerHTML = `
+                        <button class="faq-question w-full flex justify-between items-center text-left py-4 focus:outline-none">
+                            <span class="text-base font-medium text-slate-700">${item.question}</span>
+                            <svg class="faq-chevron w-5 h-5 text-slate-500 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="faq-answer">
+                            <div class="pb-4 text-slate-600 text-sm leading-relaxed">
+                                <p>${item.answer}</p>
+                                <div class="satisfaction-feedback mt-4 pt-3 border-t border-slate-100 flex items-center gap-3">
+                                    <span class="text-xs font-medium text-slate-500">Esta resposta foi útil?</span>
+                                    <div class="flex items-center gap-2">
+                                        <button class="satisfaction-btn p-1 rounded-full hover:bg-slate-200 transition-colors" data-vote="up">
+                                            <svg class="w-4 h-4 text-slate-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333V17a1 1 0 001 1h6.758a1 1 0 00.97-1.22l-1.396-4.887A3.5 3.5 0 0013.172 8H10V6.5A1.5 1.5 0 008.5 5 1.5 1.5 0 007 6.5v3.833z"></path></svg>
+                                        </button>
+                                        <button class="satisfaction-btn p-1 rounded-full hover:bg-slate-200 transition-colors" data-vote="down">
+                                            <svg class="w-4 h-4 text-slate-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M18 9.5a1.5 1.5 0 11-3 0v-6a1.5 1.5 0 013 0v6zM14 9.667V3a1 1 0 00-1-1H6.242a1 1 0 00-.97 1.22l1.396 4.887A3.5 3.5 0 009.828 12H13v1.5a1.5 1.5 0 001.5 1.5 1.5 1.5 0 001.5-1.5v-3.833z"></path></svg>
+                                        </button>
+                                    </div>
+                                    <span class="feedback-message hidden text-xs text-green-600 font-semibold">Obrigado pelo feedback!</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    faqContainer.appendChild(faqItem);
+                });
+
+                faqContainer.addEventListener('click', function(e) {
+                    const questionButton = e.target.closest('.faq-question');
+                    if(questionButton) {
+                        const answer = questionButton.nextElementSibling;
+                        const chevron = questionButton.querySelector('.faq-chevron');
+                        
+                        answer.classList.toggle('open');
+                        chevron.classList.toggle('rotate-180');
+                    }
+
+                    const satisfactionButton = e.target.closest('.satisfaction-btn');
+                    if(satisfactionButton) {
+                        const vote = satisfactionButton.dataset.vote;
+                        const feedbackContainer = satisfactionButton.closest('.satisfaction-feedback');
+                        const message = feedbackContainer.querySelector('.feedback-message');
+                        const buttons = feedbackContainer.querySelectorAll('.satisfaction-btn');
+                        
+                        buttons.forEach(btn => {
+                            btn.disabled = true;
+                            btn.classList.remove('hover:bg-slate-200');
+                            btn.querySelector('svg').classList.remove('text-slate-400');
+                        });
+                        
+                        if(vote === 'up') {
+                            satisfactionButton.querySelector('svg').classList.add('text-green-500');
+                        } else {
+                            satisfactionButton.querySelector('svg').classList.add('text-red-500');
+                        }
+                        
+                        message.classList.remove('hidden');
+                    }
+                });
+            }
+
+            // --- LÓGICA DOS LINKS DE SISTEMAS ---
+            const sistemasGrid = document.getElementById('sistemas-grid');
+            if(sistemasGrid) {
+                const sistemas = [
+                    { name: 'Service Produção', link: '#' },
+                    { name: 'Service QA', link: '#' },
+                    { name: 'Genesys', link: '#' },
+                    { name: 'MAE Core', link: '#' },
+                    { name: 'MAE Wireless', link: '#' },
+                    { name: 'Zabbix', link: '#' },
+                    { name: 'LTM', link: '#' },
+                    { name: 'Novo Revan', link: '#' },
+                    { name: 'Revan Yoda', link: '#' },
+                    { name: 'UDM (PGW)', link: '#' },
+                    { name: 'Observium', link: '#' },
+                    { name: 'Grafana', link: '#' },
+                    { name: 'Saski', link: '#' },
+                    { name: 'Beehome', link: '#' },
+                    { name: 'Jira', link: '#' }
+                ];
+
+                sistemas.forEach(sistema => {
+                    const card = document.createElement('div');
+                    card.className = 'system-card bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col';
+                    card.innerHTML = `
+                        <div class="flex items-center gap-4">
+                            <div class="bg-orange-100 p-3 rounded-full">
+                                <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                            </div>
+                            <h4 class="text-md font-bold text-slate-800">${sistema.name}</h4>
+                        </div>
+                        <p class="text-sm text-slate-500 mt-3 flex-grow">${sistema.name}</p>
+                        <a href="${sistema.link}" target="_blank" rel="noopener noreferrer" class="self-start mt-4 text-sm font-semibold text-orange-600 hover:text-orange-800 transition-colors">
+                            Acessar Sistema &rarr;
+                        </a>
+                    `;
+                    sistemasGrid.appendChild(card);
+                });
+            }
+            
+            // --- LÓGICA DA BUSCA DE RAMAIS POR CIDADE ---
+            const citySearchInput = document.getElementById('city-search');
+            if(citySearchInput) {
+                const citySuggestionsContainer = document.getElementById('city-suggestions');
+                let cities = [];
+
+                fetch('https://servicodados.ibge.gov.br/api/v1/localidades/municipios?orderBy=nome')
+                    .then(response => response.json())
+                    .then(data => {
+                        cities = data
+                            .map(city => {
+                                const uf = city.microrregiao?.mesorregiao?.UF?.sigla;
+                                if (city.nome && uf) {
+                                    return {
+                                        nome: city.nome,
+                                        uf: uf
+                                    };
+                                }
+                                return null;
+                            })
+                            .filter(Boolean); 
+                    })
+                    .catch(error => console.error('Erro ao carregar cidades:', error));
+
+                citySearchInput.addEventListener('input', () => {
+                    const inputText = citySearchInput.value.toLowerCase().trim();
+                    citySuggestionsContainer.innerHTML = '';
+
+                    if (inputText.length < 2) {
+                        citySuggestionsContainer.classList.add('hidden');
+                        return;
+                    }
+
+                    const filteredCities = cities.filter(city => 
+                        city.nome.toLowerCase().includes(inputText)
+                    ).slice(0, 10);
+
+                    if (filteredCities.length > 0) {
+                        citySuggestionsContainer.classList.remove('hidden');
+                        filteredCities.forEach(city => {
+                            const suggestionDiv = document.createElement('div');
+                            suggestionDiv.className = 'p-3 hover:bg-slate-100 cursor-pointer text-sm text-slate-700';
+                            suggestionDiv.textContent = `${city.nome} - ${city.uf}`;
+                            suggestionDiv.addEventListener('click', () => {
+                                citySearchInput.value = suggestionDiv.textContent;
+                                citySuggestionsContainer.classList.add('hidden');
+                                citySuggestionsContainer.innerHTML = '';
+                            });
+                            citySuggestionsContainer.appendChild(suggestionDiv);
+                        });
+                    } else {
+                        citySuggestionsContainer.classList.add('hidden');
+                    }
+                });
+
+                document.addEventListener('click', function(event) {
+                    if (!citySearchInput.contains(event.target) && !citySuggestionsContainer.contains(event.target)) {
+                        citySuggestionsContainer.classList.add('hidden');
+                    }
+                });
+            }
+            
+            // --- LÓGICA DO BRISA KEEP ---
+            const noteForm = document.getElementById('new-note-form');
+            if(noteForm) {
+                const notesGrid = document.getElementById('notes-grid');
+                
+                const getNotes = () => {
+                    return JSON.parse(localStorage.getItem('brisa-keep-notes') || '[]');
+                };
+
+                const saveNotes = (notes) => {
+                    localStorage.setItem('brisa-keep-notes', JSON.stringify(notes));
+                };
+
+                const createNoteElement = (id, title, content) => {
+                    const noteEl = document.createElement('div');
+                    noteEl.className = 'bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between break-words';
+                    noteEl.dataset.id = id;
+
+                    const titleEl = document.createElement('h4');
+                    titleEl.className = 'text-md font-bold text-slate-800 mb-2';
+                    titleEl.textContent = title;
+
+                    const contentEl = document.createElement('p');
+                    contentEl.className = 'text-sm text-slate-600 whitespace-pre-wrap';
+                    contentEl.textContent = content;
+                    
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.innerHTML = `<svg class="w-5 h-5 text-slate-400 hover:text-red-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>`;
+                    deleteBtn.className = 'self-end mt-4';
+                    deleteBtn.addEventListener('click', () => deleteNote(id));
+
+                    noteEl.appendChild(titleEl);
+                    noteEl.appendChild(contentEl);
+                    noteEl.appendChild(deleteBtn);
+
+                    return noteEl;
+                };
+
+                const addNote = (title, content) => {
+                    const notes = getNotes();
+                    const newNote = {
+                        id: Date.now(),
+                        title,
+                        content
+                    };
+                    notes.unshift(newNote);
+                    saveNotes(notes);
+                    renderNotes();
+                };
+
+                const deleteNote = (id) => {
+                    let notes = getNotes();
+                    notes = notes.filter(note => note.id != id);
+                    saveNotes(notes);
+                    renderNotes();
+                };
+
+                const renderNotes = () => {
+                    const notes = getNotes();
+                    notesGrid.innerHTML = '';
+                    notes.forEach(note => {
+                        const noteEl = createNoteElement(note.id, note.title, note.content);
+                        notesGrid.appendChild(noteEl);
+                    });
+                };
+                
+                noteForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const titleInput = document.getElementById('note-title');
+                    const contentInput = document.getElementById('note-content');
+
+                    if (contentInput.value.trim() === '') {
+                        return; // Não adiciona nota vazia
+                    }
+
+                    addNote(titleInput.value, contentInput.value);
+                    titleInput.value = '';
+                    contentInput.value = '';
+                });
+
+                renderNotes();
+            }
+            
+            // --- LÓGICA DA MÁSCARA DE ATENDIMENTO ---
+            const mascaraSubmitBtn = document.getElementById('mascara-submit');
+            if (mascaraSubmitBtn) {
+                const mascaraInputContainer = document.getElementById('mascara-input-container');
+                const mascaraOutputContainer = document.getElementById('mascara-output-container');
+                const mascaraInput = document.getElementById('mascara-input');
+                const mascaraOutput = document.getElementById('mascara-output');
+                const mascaraLoading = document.getElementById('mascara-loading');
+                const mascaraError = document.getElementById('mascara-error');
+                const mascaraBackButton = document.getElementById('mascara-back-button');
+                const copyRefinedTextButton = document.getElementById('copy-refined-text');
+                const mascaraCopyFeedback = document.getElementById('mascara-copy-feedback');
+
+                mascaraSubmitBtn.addEventListener('click', async () => {
+                    const inputText = mascaraInput.value.trim();
+                    if (!inputText) {
+                        mascaraError.textContent = 'Por favor, insira um texto para corrigir.';
+                        return;
+                    }
+                    
+                    mascaraError.textContent = '';
+                    mascaraLoading.classList.remove('hidden');
+                    mascaraLoading.classList.add('flex');
+                    mascaraSubmitBtn.disabled = true;
+
+                    const prompt = `Corrija o seguinte texto para que seja gramaticalmente perfeito, claro e formal, adequado para uma comunicação técnica. Não adicione nenhuma introdução, explicação ou formatação extra. Apenas retorne o texto corrigido. Se houver menção a anexos ou dados, mantenha-os como estão, corrigindo apenas a gramática da frase que os menciona. Texto original: \n\n"${inputText}"`;
+                    
+                    try {
+                        let chatHistory = [];
+                        chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                        const payload = { contents: chatHistory };
+                        const apiKey = ""
+                        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                        
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) {
+                             throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        const result = await response.json();
+                       
+                        if (result.candidates && result.candidates.length > 0 && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts.length > 0) {
+                             const refinedText = result.candidates[0].content.parts[0].text;
+                             mascaraOutput.textContent = refinedText;
+                             mascaraInputContainer.classList.add('hidden');
+                             mascaraOutputContainer.classList.remove('hidden');
+                        } else {
+                            throw new Error("Resposta da API inválida ou sem conteúdo.");
+                        }
+
+                    } catch (error) {
+                        console.error('Erro ao chamar a API Gemini:', error);
+                        mascaraError.textContent = 'Não foi possível refinar o texto. Tente novamente mais tarde.';
+                    } finally {
+                        mascaraLoading.classList.add('hidden');
+                        mascaraLoading.classList.remove('flex');
+                        mascaraSubmitBtn.disabled = false;
+                    }
+                });
+
+                mascaraBackButton.addEventListener('click', () => {
+                    mascaraOutputContainer.classList.add('hidden');
+                    mascaraInputContainer.classList.remove('hidden');
+                    mascaraInput.value = '';
+                    mascaraError.textContent = '';
+                });
+
+                copyRefinedTextButton.addEventListener('click', () => {
+                    const textToCopy = mascaraOutput.textContent;
+                    const tempTextarea = document.createElement('textarea');
+                    tempTextarea.value = textToCopy;
+                    document.body.appendChild(tempTextarea);
+                    tempTextarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempTextarea);
+
+                    mascaraCopyFeedback.textContent = 'Texto copiado para a área de transferência!';
+                    setTimeout(() => {
+                        mascaraCopyFeedback.textContent = '';
+                    }, 3000);
+                });
+            }
 
             // --- HELPER ---
             function createAlert(message, type = 'info') {
@@ -370,8 +1065,24 @@
                     error: 'bg-red-100 border-red-400 text-red-700',
                     loading: 'bg-amber-100 border-amber-400 text-amber-700',
                 };
-                return `<div class="border-l-4 p-4 rounded-r-lg ${colors[type]}" role="alert"><p class="font-medium">${message}</p></div>`;
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `border-l-4 p-4 rounded-r-lg alert-dismissible ${colors[type]}`;
+                alertDiv.setAttribute('role', 'alert');
+                alertDiv.innerHTML = `<p class="font-medium">${message}</p>`;
+                
+                const closeButton = document.createElement('button');
+                closeButton.className = 'close-button';
+                closeButton.innerHTML = '&times;';
+                
+                alertDiv.appendChild(closeButton);
+                return alertDiv.outerHTML;
             }
+
+            document.body.addEventListener('click', function(event) {
+                if (event.target.classList.contains('close-button')) {
+                    event.target.closest('.alert-dismissible').remove();
+                }
+            });
         });
     </script>
 </body>
