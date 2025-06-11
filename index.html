@@ -1,658 +1,423 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IMEI Checker - Festa Junina Digital</title>
+    <title>BrisaTel TechDashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Ubuntu Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome CDN for social icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
-        /* Fonte temática e fundo padrão */
         body {
-            font-family: 'Inter', sans-serif;
-            background: radial-gradient(ellipse at top, #ff8a00 0%, #e52e71 50%, #9b59b6 100%);
-            background-attachment: fixed;
-            min-height: 100vh;
-            position: relative;
-            overflow-x: hidden;
+            font-family: 'Ubuntu', sans-serif;
+            background-color: #f8fafc; /* bg-slate-50 */
         }
-
-        .titulo-festa {
-            font-family: 'Fredoka One', cursive;
+        .sidebar {
+            background-color: #1e293b; /* bg-slate-800 */
         }
-
-        /* Padrão xadrez animado */
-        .fundo-xadrez {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%),
-                linear-gradient(-45deg, rgba(255,255,255,0.1) 25%, transparent 25%),
-                linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.1) 75%),
-                linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.1) 75%);
-            background-size: 60px 60px;
-            background-position: 0 0, 0 30px, 30px -30px, -30px 0px;
-            animation: mover-xadrez 20s linear infinite;
-            z-index: -1;
+        .sidebar-link {
+            transition: all 0.3s ease-in-out;
+            border-left: 3px solid transparent;
         }
-
-        @keyframes mover-xadrez {
-            0% { transform: translateX(0) translateY(0); }
-            100% { transform: translateX(60px) translateY(60px); }
+        .sidebar-link:hover {
+            background-color: #334155; /* bg-slate-700 */
+            border-left-color: #f97316; /* border-orange-500 */
         }
-
-        /* Balões flutuantes */
-        .baloes {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
+        .sidebar-link.active {
+            background-color: #ea580c; /* bg-orange-600 */
+            border-left-color: #fdba74; /* border-orange-300 */
+            color: white;
         }
-
-        .balao {
-            position: absolute;
-            font-size: 2rem;
-            animation: flutuar 6s ease-in-out infinite;
+        .result-card, .gemini-result {
+            animation: fadeIn 0.5s ease-in-out;
         }
-
-        .balao:nth-child(1) { left: 10%; animation-delay: 0s; color: #ff6b6b; }
-        .balao:nth-child(2) { left: 20%; animation-delay: 1s; color: #4ecdc4; }
-        .balao:nth-child(3) { left: 70%; animation-delay: 2s; color: #45b7d1; }
-        .balao:nth-child(4) { left: 80%; animation-delay: 3s; color: #f9ca24; }
-
-        @keyframes flutuar {
-            0%, 100% { transform: translateY(100vh) rotate(0deg); }
-            50% { transform: translateY(-100px) rotate(180deg); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-
-        /* Card principal com tema de barraca de festa */
-        .barraca-festa {
-            background: linear-gradient(145deg, #ffffff 0%, #f8f9ff 100%);
-            border: 4px solid #ff6b6b;
-            border-radius: 25px;
-            box-shadow: 
-                0 20px 40px rgba(0,0,0,0.1),
-                inset 0 1px 0 rgba(255,255,255,0.6);
-            position: relative;
-            backdrop-filter: blur(20px);
-        }
-
-        .barraca-festa::before {
-            content: '';
-            position: absolute;
-            top: -15px;
-            left: -4px;
-            right: -4px;
-            height: 30px;
-            background: repeating-linear-gradient(
-                90deg,
-                #ff6b6b 0px,
-                #ff6b6b 40px,
-                #4ecdc4 40px,
-                #4ecdc4 80px,
-                #f9ca24 80px,
-                #f9ca24 120px,
-                #45b7d1 120px,
-                #45b7d1 160px
-            );
-            border-radius: 15px 15px 0 0;
-            z-index: -1;
-        }
-
-        .barraca-festa::after {
-            content: '🎪';
-            position: absolute;
-            top: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 2.5rem;
-            background: white;
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 4px solid #ff6b6b;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        /* Modo escuro com tema junino */
-        html.dark body {
-            background: radial-gradient(ellipse at top, #2c1810 0%, #8b0000 50%, #4a0080 100%);
-        }
-
-        html.dark .barraca-festa {
-            background: linear-gradient(145deg, #1a202c 0%, #2d3748 100%);
-            border-color: #f56565;
-        }
-
-        html.dark .barraca-festa::before {
-            background: repeating-linear-gradient(
-                90deg,
-                #f56565 0px,
-                #f56565 40px,
-                #38b2ac 40px,
-                #38b2ac 80px,
-                #ecc94b 80px,
-                #ecc94b 120px,
-                #4299e1 120px,
-                #4299e1 160px
-            );
-        }
-
-        html.dark .barraca-festa::after {
-            background: #2d3748;
-            border-color: #f56565;
-        }
-
-        html.dark .text-gray-800 { color: #e2e8f0; }
-        html.dark .text-gray-700 { color: #cbd5e0; }
-        html.dark .text-gray-600 { color: #a0aec0; }
-        html.dark .bg-gray-50 { background-color: #2d3748; }
-        html.dark .border-gray-200 { border-color: #4a5568; }
-        html.dark .bg-yellow-50 { background-color: #744210; }
-        html.dark .text-yellow-800 { color: #faf089; }
-        html.dark .text-blue-700 { color: #90cdf4; }
-        html.dark .text-orange-600 { color: #f6ad55; }
-        html.dark .text-red-600 { color: #fc8181; }
-
-        /* Input estilizado */
-        .input-festa {
-            background: linear-gradient(145deg, #ffffff, #f7fafc);
-            border: 3px solid transparent;
-            background-clip: padding-box;
-            box-shadow: 
-                0 0 0 3px rgba(255, 107, 107, 0.1),
-                inset 0 1px 3px rgba(0,0,0,0.1);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .input-festa:focus {
-            box-shadow: 
-                0 0 0 3px rgba(255, 107, 107, 0.4),
-                0 10px 25px rgba(255, 107, 107, 0.15);
-            transform: translateY(-2px);
-        }
-
-        html.dark .input-festa {
-            background: linear-gradient(145deg, #2d3748, #4a5568);
-            color: #e2e8f0;
-        }
-
-        /* Botão principal temático */
-        .botao-festa {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 50%, #ff9ff3 100%);
-            border: none;
-            box-shadow: 
-                0 10px 30px rgba(255, 107, 107, 0.4),
-                inset 0 1px 0 rgba(255,255,255,0.3);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .botao-festa::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            transition: left 0.6s;
-        }
-
-        .botao-festa:hover::before {
-            left: 100%;
-        }
-
-        .botao-festa:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 15px 40px rgba(255, 107, 107, 0.5);
-        }
-
-        .botao-festa:active {
-            transform: translateY(-1px) scale(0.98);
-        }
-
-        /* Toggle modo escuro estilizado */
-        .toggle-festa {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: 2px solid rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-        }
-
-        .toggle-festa:hover {
-            transform: rotate(180deg) scale(1.1);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-        }
-
-        /* Área de resultados temática */
-        .resultado-festa {
-            background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,249,255,0.8) 100%);
-            border: 2px dashed #ff6b6b;
-            backdrop-filter: blur(10px);
-            position: relative;
-        }
-
-        html.dark .resultado-festa {
-            background: linear-gradient(135deg, rgba(45,55,72,0.9) 0%, rgba(74,85,104,0.8) 100%);
-            border-color: #f56565;
-        }
-
-        /* Fogos de artifício */
-        .fogos {
-            position: fixed;
-            pointer-events: none;
-            z-index: 100;
-        }
-
-        .fogo {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            border-radius: 50%;
-            animation: explodir 2s ease-out infinite;
-        }
-
-        @keyframes explodir {
-            0% {
-                transform: scale(0) rotate(0deg);
-                opacity: 1;
-            }
-            50% {
-                transform: scale(1) rotate(180deg);
-                opacity: 0.8;
-            }
-            100% {
-                transform: scale(0) rotate(360deg);
-                opacity: 0;
-            }
-        }
-
-        /* Milho dançante */
-        .milho-dancante {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            font-size: 3rem;
-            animation: dancar 2s ease-in-out infinite;
-            z-index: 50;
+        .action-button {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            margin-top: 1rem;
+            font-weight: 600; /* semibold */
+            color: white;
+            background-color: #f97316; /* bg-orange-500 */
+            border-radius: 0.5rem; /* rounded-lg */
+            text-decoration: none;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
             cursor: pointer;
-            transition: transform 0.3s ease;
         }
-
-        .milho-dancante:hover {
-            transform: scale(1.3) rotate(360deg);
+        .action-button:hover {
+            background-color: #ea580c; /* bg-orange-600 */
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
         }
-
-        @keyframes dancar {
-            0%, 100% { transform: rotate(-10deg) translateY(0px); }
-            25% { transform: rotate(10deg) translateY(-10px); }
-            50% { transform: rotate(-5deg) translateY(-20px); }
-            75% { transform: rotate(5deg) translateY(-10px); }
+        .main-panel-card {
+            background-color: #ffffff; /* bg-white */
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
+            border: 1px solid #e2e8f0; /* border-slate-200 */
         }
-
-        /* Footer temático */
+        input, select {
+           background-color: #f1f5f9; /* bg-slate-100 */
+           border-color: #cbd5e1; /* border-slate-300 */
+           color: #334155; /* text-slate-700 */
+        }
+        input:focus, select:focus {
+            --tw-ring-color: #f97316; /* ring-orange-500 */
+            border-color: #f97316;
+        }
         .footer-festa {
-            background: linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(139,0,0,0.9) 100%);
-            backdrop-filter: blur(15px);
-            border-top: 3px solid #ff6b6b;
-            position: relative;
+            background-color: #1e293b; /* bg-slate-800 */
+            border-top: 1px solid #334155; /* border-slate-700 */
         }
-
-        .footer-festa::before {
-            content: '';
-            position: absolute;
-            top: -10px;
-            left: 0;
-            right: 0;
-            height: 10px;
-            background: repeating-linear-gradient(
-                90deg,
-                #ff6b6b 0px,
-                #ff6b6b 20px,
-                #4ecdc4 20px,
-                #4ecdc4 40px,
-                #f9ca24 40px,
-                #f9ca24 60px
-            );
-        }
-
-        /* Animações dos ícones sociais */
         .social-icon {
-            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            transition: transform 0.3s ease, color 0.3s ease;
         }
-
         .social-icon:hover {
-            transform: translateY(-8px) rotate(15deg) scale(1.2);
-        }
-
-        /* Responsividade */
-        @media (max-width: 640px) {
-            .barraca-festa {
-                margin: 20px;
-                border-radius: 20px;
-            }
-            
-            .titulo-festa {
-                font-size: 1.5rem;
-            }
-            
-            .balao {
-                font-size: 1.5rem;
-            }
+            transform: scale(1.2);
         }
     </style>
 </head>
-<body class="transition-colors duration-500">
-    <!-- Fundo xadrez animado -->
-    <div class="fundo-xadrez"></div>
-    
-    <!-- Balões flutuantes -->
-    <!-- Gostei não, corrijo depois
-<div class="baloes">
-    <div class="balao">🎈</div>
-    <div class="balao">🎉</div>
-    <div class="balao">🔥</div>
-    <div class="balao">🌽</div>
-    <div class="balao">🍢</div>
-    <div class="balao">🪕</div>
-    <div class="balao">🧺</div>
-    <div class="balao">🎶</div>
-    <div class="balao">🕺</div>
-    <div class="balao">💃</div>
-    <div class="balao">🎩</div>
-    <div class="balao">🌾</div>
-    <div class="balao">🍺</div>
-    <div class="balao">🪁</div>
-    <div class="balao">🪵</div>
-    <div class="balao">🍭</div>
-    <div class="balao">🥥</div>
-    <div class="balao">🍠</div>
-    <div class="balao">🎯</div>
-    <div class="balao">🧑‍🌾</div>
-</div>
-    -!>
+<body>
 
-    
-    <!-- Milho dançante -->
-    <div class="milho-dancante" onclick="criarFogos()">🌽</div>
-    
-    <!-- Fogos de artifício -->
-    
-    <div class="fogos" id="fogos"></div>
-
-    <main class="min-h-screen flex items-center justify-center p-4 relative z-10">
-        <div class="barraca-festa p-8 w-full max-w-lg transition-all duration-500">
-            <!-- Toggle modo escuro -->
-            <div class="flex justify-end mb-6">
-                <button id="darkModeToggle" class="toggle-festa p-3 rounded-full text-white focus:outline-none focus:ring-4 focus:ring-purple-300">
-                    <svg id="sunIcon" class="w-6 h-6 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h1M3 12h1m15.325-7.757l-.707-.707M4.343 19.071l-.707-.707M18.364 5.636l.707-.707M5.636 18.364l.707.707M12 18a6 6 0 100-12 6 6 0 000 12z"></path>
-                    </svg>
-                    <svg id="moonIcon" class="w-6 h-6 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
-                    </svg>
-                </button>
-            </div>
-
-            <!-- Título principal -->
-            <div class="text-center mb-8">
-                <h1 class="titulo-festa text-4xl font-bold text-gray-800 dark:text-white mb-2 transition-colors duration-300">
-                    Consulta de IMEI
-                </h1>
-                <div class="flex items-center justify-center gap-2 text-lg font-semibold text-pink-600 dark:text-pink-300">
-                    <span>🎊</span>
-                    <span>Festa Junina Digital</span>
-                    <span>🎊</span>
-                </div>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">Arraiá Tecnológico 2025</p>
-            </div>
-
-            <!-- Formulário -->
-            <div class="space-y-6">
-                <div>
-                    <label for="imeiInput" class="block text-gray-700 dark:text-gray-300 text-sm font-semibold mb-3 flex items-center gap-2">
-                        <span>📱</span>
-                        <span>Digite o número IMEI (15 dígitos):</span>
-                    </label>
-                    <input
-                        type="text"
-                        id="imeiInput"
-                        maxlength="15"
-                        class="input-festa w-full py-4 px-4 text-gray-700 dark:text-gray-200 rounded-xl focus:outline-none font-mono text-lg"
-                        placeholder="123456789012345"
-                    >
-                </div>
-
-                <button
-                    id="checkImeiBtn"
-                    class="botao-festa w-full py-4 px-6 text-white font-bold text-lg rounded-xl focus:outline-none relative z-10"
-                >
-                    <span class="flex items-center justify-center gap-3">
-                        <span>🔍</span>
-                        <span>Consultar no Arraiá</span>
-                        <span>🎯</span>
-                    </span>
-                </button>
-            </div>
-
-            <!-- Área de resultados -->
-            <div id="results" class="resultado-festa mt-8 p-6 rounded-xl transition-all duration-300">
-                <div class="text-center text-gray-600 dark:text-gray-400">
-                    <div class="text-3xl mb-2">🎪</div>
-                    <p class="text-sm italic">Aguardando consulta na festa junina...</p>
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="fixed inset-y-0 left-0 z-30 flex flex-col w-64 overflow-y-auto transition duration-300 transform -translate-x-full sidebar lg:translate-x-0 lg:static lg:inset-0" id="sidebar">
+            <div class="flex items-center justify-center flex-shrink-0 mt-8">
+                <div class="flex items-center">
+                    <!-- Logo Image -->
+                    <img src="favicon-brisanet.png" alt="BrisaTel Logo" class="w-10 h-10">
+                    <span class="ml-3 text-2xl font-bold text-white">BrisaTel</span>
                 </div>
             </div>
+            <nav class="mt-12 flex-1" id="nav-menu">
+                <a class="sidebar-link flex items-center px-6 py-3 mt-4 text-slate-200 active" href="#" data-target="imei">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-1.096.904-2.39.904-3.732a8 8 0 10-14.708 4.28c.16.05.32.1.48.15"></path></svg>
+                    <span class="mx-4">Consultar IMEI</span>
+                </a>
+                <a class="sidebar-link flex items-center px-6 py-3 mt-4 text-slate-400" href="#" data-target="dispositivo">
+                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                    <span class="mx-4">Consultar Dispositivo</span>
+                </a>
+                <a class="sidebar-link flex items-center px-6 py-3 mt-4 text-slate-400" href="#" data-target="portabilidade">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                    <span class="mx-4">Consultar Portabilidade</span>
+                </a>
+                <a class="sidebar-link flex items-center px-6 py-3 mt-4 text-slate-400" href="#" data-target="consulta-numero">
+                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                    <span class="mx-4">Consulta de Número</span>
+                </a>
+            </nav>
         </div>
-    </main>
 
-    <!-- Footer -->
-    <footer class="footer-festa text-white py-8 text-center relative">
-        <div class="max-w-4xl mx-auto px-4">
-            <div class="mb-6">
-                <h3 class="text-xl font-bold mb-2 flex items-center justify-center gap-2">
-                    <span>🎭</span>
-                    <span>Eduardo André Campos</span>
-                    <span>🎭</span>
-                </h3>
-                <p class="text-sm opacity-90">Desenvolvedor do Arraiá Tecnológico</p>
-                <p class="text-xs opacity-75 mt-1">© 2025 - Todos os direitos reservados na festa!</p>
-            </div>
-            
-            <div class="flex justify-center space-x-6 flex-wrap gap-4">
-                <a href="#" class="social-icon text-white hover:text-blue-300" aria-label="Facebook">
-                    <i class="fab fa-facebook-f text-2xl"></i>
-                </a>
-                <a href="#" class="social-icon text-white hover:text-pink-300" aria-label="Instagram">
-                    <i class="fab fa-instagram text-2xl"></i>
-                </a>
-                <a href="#" class="social-icon text-white hover:text-cyan-300" aria-label="Telegram">
-                    <i class="fab fa-telegram-plane text-2xl"></i>
-                </a>
-                <a href="#" class="social-icon text-white hover:text-green-300" aria-label="WhatsApp">
-                    <i class="fab fa-whatsapp text-2xl"></i>
-                </a>
-                <a href="#" class="social-icon text-white hover:text-gray-300" aria-label="GitHub">
-                    <i class="fab fa-github text-2xl"></i>
-                </a>
-                <a href="#" class="social-icon text-white hover:text-orange-300" aria-label="GitLab">
-                    <i class="fab fa-gitlab text-2xl"></i>
-                </a>
-                <a href="#" class="social-icon text-white hover:text-blue-400" aria-label="LinkedIn">
-                    <i class="fab fa-linkedin-in text-2xl"></i>
-                </a>
-                <a href="mailto:seu.email@example.com" class="social-icon text-white hover:text-red-300" aria-label="E-mail">
-                    <i class="fas fa-envelope text-2xl"></i>
-                </a>
-            </div>
+        <!-- Main content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+             <!-- Mobile Header -->
+            <header class="flex items-center justify-between p-4 bg-white border-b-2 border-slate-100 lg:hidden">
+                <button id="mobile-menu-button" class="text-slate-500 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+                <div class="flex items-center">
+                    <img src="favicon-brisanet.png" alt="BrisaTel Logo" class="w-8 h-8">
+                    <span class="ml-2 text-xl font-bold text-slate-800">BrisaTel</span>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-x-hidden overflow-y-auto">
+                <div class="container px-6 py-8 mx-auto">
+                    
+                    <!-- IMEI Panel -->
+                    <div id="imei-panel" class="content-panel">
+                        <h3 class="text-3xl font-bold text-slate-800">Consultar IMEI</h3>
+                        <div class="mt-6 p-6 main-panel-card">
+                            <form id="imei-form">
+                                <label class="block text-sm font-medium text-slate-600">Número do IMEI</label>
+                                <input type="text" id="imei-input" placeholder="Digite o IMEI de 14 ou 15 dígitos" class="w-full px-4 py-3 mt-2 rounded-lg focus:outline-none transition" maxlength="15">
+                                <button type="submit" class="w-full py-3 action-button">Validar e Consultar</button>
+                            </form>
+                            <div id="imei-results" class="mt-6 hidden"></div>
+                        </div>
+                    </div>
+
+                    <!-- Dispositivo Panel -->
+                    <div id="dispositivo-panel" class="hidden content-panel">
+                        <h3 class="text-3xl font-bold text-slate-800">Consultar Dispositivo</h3>
+                        <div class="mt-6 p-6 main-panel-card">
+                            <form id="dispositivo-form">
+                                <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                    <div>
+                                        <label for="dispositivo-brand-select" class="block text-sm font-medium text-slate-600">Marca</label>
+                                        <select id="dispositivo-brand-select" class="w-full px-4 py-3 mt-2 rounded-lg focus:outline-none transition">
+                                                <option>Samsung</option>
+                                                <option>Apple</option>
+                                                <option>Xiaomi</option>
+                                                <option>Motorola</option>
+                                                <option>Asus</option>
+                                                <option>Huawei</option>
+                                                <option>Realme</option>
+                                                <option>OnePlus</option>
+                                                <option>Nokia</option>
+                                                <option>Lenovo</option>
+                                                <option>LG</option>
+                                                <option>Sony</option>
+                                                <option>ZTE</option>
+                                                <option>Tecno</option>
+                                                <option>Vivo</option>
+                                                <option>Infinix</option>
+                                                <option>Oppo</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="dispositivo-model-input" class="block text-sm font-medium text-slate-600">Modelo</label>
+                                        <input type="text" id="dispositivo-model-input" placeholder="Ex: Galaxy S24 Ultra" class="w-full px-4 py-3 mt-2 rounded-lg focus:outline-none transition">
+                                    </div>
+                                </div>
+                                <button type="submit" class="w-full py-3 mt-6 action-button">Buscar</button>
+                            </form>
+                            <div id="dispositivo-results" class="mt-6 hidden"></div>
+                        </div>
+                    </div>
+
+                    <!-- Portabilidade Panel -->
+                    <div id="portabilidade-panel" class="hidden content-panel">
+                         <h3 class="text-3xl font-bold text-slate-800">Consultar Portabilidade</h3>
+                        <div class="mt-6 p-6 main-panel-card">
+                            <form id="portabilidade-form">
+                                <label class="block text-sm font-medium text-slate-600">Número de Telefone</label>
+                                <input type="text" id="portabilidade-input" placeholder="(XX) XXXXX-XXXX" class="w-full px-4 py-3 mt-2 rounded-lg focus:outline-none transition">
+                                <button type="submit" class="w-full py-3 mt-4 action-button">Consultar</button>
+                            </form>
+                            <div id="portabilidade-results" class="mt-6 hidden"></div>
+                        </div>
+                    </div>
+
+                    <!-- Consulta de Número Panel -->
+                    <div id="consulta-numero-panel" class="hidden content-panel">
+                        <h3 class="text-3xl font-bold text-slate-800">Consulta de Número</h3>
+                        <div class="mt-6 p-6 main-panel-card">
+                            <h4 class="text-2xl font-semibold text-slate-700">Em construção</h4>
+                            <p class="text-slate-500 mt-2">Esta funcionalidade incrível será implementada em breve.</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Footer -->
+                <footer class="footer-festa text-white py-8 text-center relative mt-12">
+                    <div class="max-w-4xl mx-auto px-4">
+                        <div class="mb-6">
+                            <h3 class="text-xl font-bold mb-2 flex items-center justify-center gap-2">
+                                <span>🎭</span>
+                                <span>Eduardo André Campos</span>
+                                <span>🎭</span>
+                            </h3>
+                            <p class="text-sm opacity-90">Desenvolvedor do Arraiá Tecnológico</p>
+                            <p class="text-xs opacity-75 mt-1">© 2025 - Todos os direitos reservados na festa!</p>
+                        </div>
+                        
+                        <div class="flex justify-center space-x-6 flex-wrap gap-4">
+                            <a href="#" class="social-icon text-white hover:text-blue-300" aria-label="Facebook">
+                                <i class="fab fa-facebook-f text-2xl"></i>
+                            </a>
+                            <a href="#" class="social-icon text-white hover:text-pink-300" aria-label="Instagram">
+                                <i class="fab fa-instagram text-2xl"></i>
+                            </a>
+                            <a href="#" class="social-icon text-white hover:text-cyan-300" aria-label="Telegram">
+                                <i class="fab fa-telegram-plane text-2xl"></i>
+                            </a>
+                            <a href="#" class="social-icon text-white hover:text-green-300" aria-label="WhatsApp">
+                                <i class="fab fa-whatsapp text-2xl"></i>
+                            </a>
+                            <a href="#" class="social-icon text-white hover:text-gray-300" aria-label="GitHub">
+                                <i class="fab fa-github text-2xl"></i>
+                            </a>
+                            <a href="#" class="social-icon text-white hover:text-orange-300" aria-label="GitLab">
+                                <i class="fab fa-gitlab text-2xl"></i>
+                            </a>
+                            <a href="#" class="social-icon text-white hover:text-blue-400" aria-label="LinkedIn">
+                                <i class="fab fa-linkedin-in text-2xl"></i>
+                            </a>
+                            <a href="mailto:seu.email@example.com" class="social-icon text-white hover:text-red-300" aria-label="E-mail">
+                                <i class="fas fa-envelope text-2xl"></i>
+                            </a>
+                        </div>
+                    </div>
+                </footer>
+            </main>
         </div>
-    </footer>
+    </div>
 
     <script>
-        // Funcionalidade completa mantida do código original
-        document.addEventListener('DOMContentLoaded', () => {
-            const imeiInput = document.getElementById('imeiInput');
-            const checkImeiBtn = document.getElementById('checkImeiBtn');
-            const resultsDiv = document.getElementById('results');
-            const darkModeToggle = document.getElementById('darkModeToggle');
-            const htmlElement = document.documentElement;
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- Elements ---
+            const navLinks = document.querySelectorAll('#nav-menu a');
+            const contentPanels = document.querySelectorAll('.content-panel');
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const sidebar = document.getElementById('sidebar');
 
-            // Tema escuro
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                htmlElement.classList.add('dark');
-            }
+            // --- Navigation ---
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = link.dataset.target;
 
-            darkModeToggle.addEventListener('click', () => {
-                htmlElement.classList.toggle('dark');
-                localStorage.setItem('theme', htmlElement.classList.contains('dark') ? 'dark' : 'light');
+                    navLinks.forEach(navLink => {
+                        navLink.classList.remove('active');
+                        navLink.classList.add('text-slate-400');
+                    });
+                    link.classList.add('active');
+                    link.classList.remove('text-slate-400');
+                    
+                    contentPanels.forEach(panel => {
+                        panel.classList.add('hidden');
+                    });
+                    document.getElementById(`${targetId}-panel`).classList.remove('hidden');
+
+                    if(sidebar.classList.contains('lg:static')) {
+                         sidebar.classList.add('-translate-x-full');
+                    }
+                });
             });
 
-            // Validação Luhn (mantida integralmente)
-            function validateLuhn(imei) {
-                if (!imei || imei.length !== 15) return false;
-                let sum = 0, double = false;
-                for (let i = imei.length - 1; i >= 0; i--) {
-                    let digit = parseInt(imei.charAt(i), 10);
-                    if (double) {
+            mobileMenuButton.addEventListener('click', () => {
+                sidebar.classList.toggle('-translate-x-full');
+            });
+
+            // --- IMEI LOGIC ---
+            const imeiForm = document.getElementById('imei-form');
+            const imeiInput = document.getElementById('imei-input');
+            const imeiResults = document.getElementById('imei-results');
+
+            function isValidLuhn(imei) {
+                if (!/^\d{15}$/.test(imei)) return false;
+                let sum = 0;
+                for (let i = 0; i < 15; i++) {
+                    let digit = parseInt(imei[i], 10);
+                    if (i % 2 !== 0) {
                         digit *= 2;
-                        if (digit > 9) digit -= 9;
+                        if (digit > 9) {
+                            digit -= 9;
+                        }
                     }
                     sum += digit;
-                    double = !double;
                 }
-                return (sum % 10) === 0;
+                return sum % 10 === 0;
             }
 
-            function calculateLuhnChecksum(prefix) {
-                let sum = 0, double = true;
-                for (let i = prefix.length - 1; i >= 0; i--) {
-                    let digit = parseInt(prefix.charAt(i), 10);
-                    if (double) {
-                        digit *= 2;
-                        if (digit > 9) digit -= 9;
+            function correctLuhn(imeiBase) {
+                const base = imeiBase.slice(0, 14);
+                for (let lastDigit = 0; lastDigit <= 9; lastDigit++) {
+                    const tempImei = base + lastDigit;
+                    if (isValidLuhn(tempImei)) {
+                        return tempImei;
                     }
-                    sum += digit;
-                    double = !double;
                 }
-                return (10 - (sum % 10)) % 10;
+                return null;
             }
 
-            // Event listener principal
-            checkImeiBtn.addEventListener('click', () => {
-                const rawImei = imeiInput.value.trim();
-                const imei = rawImei.replace(/\D/g, '');
-                resultsDiv.innerHTML = '';
+            imeiForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const imei = imeiInput.value.trim();
 
-                if (imei.length !== 15) {
-                    resultsDiv.innerHTML = `
-                        <div class="text-center text-red-500 dark:text-red-400">
-                            <div class="text-3xl mb-2">❌</div>
-                            <p class="font-semibold">Ops! IMEI incompleto na festa!</p>
-                            <p class="text-sm mt-1">Por favor, digite exatamente 15 dígitos</p>
-                        </div>
-                    `;
+                if (!/^\d{14,15}$/.test(imei)) {
+                    imeiResults.innerHTML = createAlert('Por favor, insira um IMEI com 14 ou 15 dígitos.', 'error');
+                    imeiResults.classList.remove('hidden');
                     return;
                 }
+                
+                let finalImei = imei;
+                let message = '';
+                let isValid = false;
 
-                if (validateLuhn(imei)) {
-                    displayResult(imei, true, false);
-                    showWarning();
+                if (isValidLuhn(imei)) {
+                    isValid = true;
+                    message = `<p class="font-semibold text-green-600">IMEI válido: ${finalImei}</p>`;
                 } else {
-                    const imeiPrefix = imei.substring(0, 14);
-                    const correctChecksum = calculateLuhnChecksum(imeiPrefix);
-                    const correctedImei = imeiPrefix + String(correctChecksum);
-
-                    resultsDiv.innerHTML = `
-                        <div class="text-center text-orange-500 dark:text-orange-400 mb-6">
-                            <div class="text-3xl mb-2">🔧</div>
-                            <p class="font-semibold">IMEI corrigido na oficina da festa!</p>
-                            <p class="text-sm mt-1">Original: <span class="font-mono">${imei}</span></p>
-                            <p class="text-sm">Corrigido: <span class="font-mono font-bold">${correctedImei}</span></p>
-                        </div>
-                    `;
-                    displayResult(correctedImei, true, true);
-                    showWarning();
+                    const corrected = correctLuhn(imei);
+                    if (corrected) {
+                        isValid = true;
+                        finalImei = corrected;
+                        message = `<p class="font-semibold text-orange-600">IMEI corrigido: ${finalImei}</p>`;
+                    } else {
+                        imeiResults.innerHTML = createAlert('Não foi possível validar ou corrigir o IMEI.', 'error');
+                        imeiResults.classList.remove('hidden');
+                        return;
+                    }
+                }
+                
+                if (isValid) {
+                    const redirectUrl = `https://www.imei.info/?imei=${finalImei}`;
+                    const finalMessage = message + '<p class="mt-2 text-sm text-slate-500">Redirecionando para o IMEI.info em uma nova aba...</p>';
+                    imeiResults.innerHTML = finalMessage;
+                    imeiResults.classList.remove('hidden');
+                    imeiResults.classList.add('result-card');
+                    window.open(redirectUrl, '_blank');
                 }
             });
+            
+            // --- DISPOSITIVO LOGIC ---
+            const dispositivoForm = document.getElementById('dispositivo-form');
+            const brandSelect = document.getElementById('dispositivo-brand-select');
+            const modelInput = document.getElementById('dispositivo-model-input');
+            const dispositivoResults = document.getElementById('dispositivo-results');
+            
+            dispositivoForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const brand = brandSelect.value.trim();
+                const model = modelInput.value.trim();
+                
+                if (!model) {
+                    dispositivoResults.innerHTML = createAlert('Por favor, digite o modelo do aparelho.', 'error');
+                    dispositivoResults.classList.remove('hidden');
+                    return;
+                }
+                
+                const modelSlug = model.toLowerCase().replace(/\s+/g, '-');
+                const brandSlug = brand.toLowerCase().replace(/\s+/g, '-');
+                const modelQuery = model.replace(/\s+/g, '+');
 
-            function displayResult(imei, isLuhnValid, wasCorrected) {
-                const imeiInfoUrl = `https://www.imei.info/?imei=${imei}`;
+                const kimovilUrl = `https://www.kimovil.com/pt/onde-comprar-${brandSlug}-${modelSlug}`;
+                const maisCelularUrl = `https://www.maiscelular.com.br/fichas-tecnicas/${brandSlug}/${modelSlug}/`;
+                const gsmArenaUrl = `https://www.gsmarena.com/res.php3?sSearch=${modelQuery}`;
                 
-                const resultItem = document.createElement('div');
-                resultItem.className = 'bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border-2 border-green-300 dark:border-green-600 mt-4';
-                
-                resultItem.innerHTML = `
-                    <div class="text-center">
-                        <div class="text-4xl mb-3">🎉</div>
-                        <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">IMEI Validado!</h3>
-                        <p class="font-mono text-lg text-blue-600 dark:text-blue-400 mb-4">${imei}</p>
-                        <a href="${imeiInfoUrl}" target="_blank" rel="noopener noreferrer"
-                           class="inline-flex items-center gap-2 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg">
-                            <span>🌐</span>
-                            <span>Verificar no imei.info</span>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                            </svg>
-                        </a>
+                dispositivoResults.innerHTML = `
+                    <h4 class="text-xl font-semibold text-slate-700 border-b border-slate-200 pb-3 mb-4">Opções de Pesquisa para ${brand} ${model}</h4>
+                    <div class="flex flex-col md:flex-row gap-4 mt-4">
+                        <a href="${kimovilUrl}" target="_blank" class="action-button flex-1 text-center">Pesquisar no Kimovil</a>
+                        <a href="${maisCelularUrl}" target="_blank" class="action-button flex-1 text-center">Pesquisar no MaisCelular</a>
+                        <a href="${gsmArenaUrl}" target="_blank" class="action-button flex-1 text-center">Pesquisar no GSMArena</a>
                     </div>
                 `;
-                
-                resultsDiv.appendChild(resultItem);
-                window.open(imeiInfoUrl, '_blank');
-                criarFogos();
-            }
+                dispositivoResults.classList.remove('hidden');
+                dispositivoResults.classList.add('result-card');
+            });
 
-            function showWarning() {
-                const warningDiv = document.createElement('div');
-                warningDiv.className = 'mt-6 p-4 bg-yellow-50 dark:bg-yellow-900 border-2 border-yellow-300 dark:border-yellow-600 rounded-xl';
-                warningDiv.innerHTML = `
-                    <div class="flex items-start gap-3">
-                        <span class="text-2xl">⚠️</span>
-                        <div class="text-yellow-800 dark:text-yellow-200 text-sm">
-                            <p class="font-semibold mb-1">Aviso Importante da Festa:</p>
-                            <p>Devido às políticas de segurança (CORS) e medidas anti-bot do imei.info, consultas automáticas não são possíveis diretamente desta página. O IMEI é válido quando o site exibe informações do aparelho ao invés de erro.</p>
-                        </div>
-                    </div>
-                `;
-                resultsDiv.appendChild(warningDiv);
+
+            // --- PORTABILIDADE LOGIC ---
+            const portabilidadeForm = document.getElementById('portabilidade-form');
+            const portabilidadeResults = document.getElementById('portabilidade-results');
+            
+            portabilidadeForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                portabilidadeResults.innerHTML = createAlert('Este serviço estará disponível em breve.', 'info');
+                portabilidadeResults.classList.remove('hidden');
+            });
+
+            // --- HELPER ---
+            function createAlert(message, type = 'info') {
+                const colors = {
+                    info: 'bg-orange-100 border-orange-400 text-orange-700',
+                    error: 'bg-red-100 border-red-400 text-red-700',
+                    loading: 'bg-amber-100 border-amber-400 text-amber-700',
+                };
+                return `<div class="border-l-4 p-4 rounded-r-lg ${colors[type]}" role="alert"><p class="font-medium">${message}</p></div>`;
             }
         });
-
-        // Função para criar fogos de artifício
-        function criarFogos() {
-            const fogosContainer = document.getElementById('fogos');
-            const cores = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#a8e6cf', '#ffd93d'];
-            
-            for (let i = 0; i < 15; i++) {
-                const fogo = document.createElement('div');
-                fogo.className = 'fogo';
-                fogo.style.backgroundColor = cores[Math.floor(Math.random() * cores.length)];
-                fogo.style.left = Math.random() * window.innerWidth + 'px';
-                fogo.style.top = Math.random() * window.innerHeight + 'px';
-                fogo.style.animationDelay = Math.random() * 1 + 's';
-                
-                fogosContainer.appendChild(fogo);
-                
-                setTimeout(() => {
-                    fogo.remove();
-                }, 2000);
-            }
-        }
-
-        // Criar fogos automaticamente de vez em quando
-        setInterval(() => {
-            if (Math.random() < 0.3) criarFogos();
-        }, 5000);
     </script>
 </body>
 </html>
