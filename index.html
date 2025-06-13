@@ -349,7 +349,7 @@
                 error.value = '';
                 try {
                     // A chamada de API real está aqui.
-                    // ATENÇÃO: Este endpoint é uma rede local e pode não funcionar fora do ambiente da Brisanet.
+                    // Este endpoint é uma rede local e não funciona fora do ambiente da Brisanet.
                     // O código está preparado para a chamada real, mas pode resultar em erro de rede.
                     const response = await fetch(`http://172.26.50.141:800/operadora?num=${numOnly}`);
                     
