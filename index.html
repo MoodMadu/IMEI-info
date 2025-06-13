@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BrisaTel</title>
+    <title>BrisaTel | Vue.js Edition</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -15,6 +15,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Favicon Link -->
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/moodmadu/imei-info/main/favicon-brisanet.png">
 
     <!-- Estilos Globais -->
     <style>
@@ -79,7 +82,7 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
                 </button>
                 <div class="flex items-center">
-                    <img src="https://raw.githubusercontent.com/moodmadu/images/main/favicon-brisanet.png" alt="BrisaTel Logo" class="w-8 h-8">
+                    <img src="https://raw.githubusercontent.com/moodmadu/imei-info/main/favicon-brisanet.png" alt="BrisaTel Logo" class="w-8 h-8">
                     <span class="ml-2 text-xl font-bold text-slate-800">BrisaTel</span>
                 </div>
                  <div class="w-6"></div> <!-- Espaçador -->
@@ -119,7 +122,7 @@
             <aside :class="['fixed inset-y-0 left-0 z-30 flex flex-col w-64 overflow-y-auto transition-transform duration-300 transform', isOpen ? 'translate-x-0' : '-translate-x-full', 'lg:translate-x-0 lg:static lg:inset-0']" class="bg-slate-800">
                 <div class="flex items-center justify-center flex-shrink-0 mt-8">
                     <div class="flex items-center">
-                        <img src="https://raw.githubusercontent.com/moodmadu/images/main/favicon-brisanet.png" alt="BrisaTel Logo" class="w-10 h-10">
+                        <img src="https://raw.githubusercontent.com/moodmadu/imei-info/main/favicon-brisanet.png" alt="BrisaTel Logo" class="w-10 h-10">
                         <span class="ml-3 text-2xl font-bold text-white">BrisaTel</span>
                     </div>
                 </div>
@@ -346,8 +349,8 @@
                 error.value = '';
                 try {
                     // A chamada de API real está aqui.
-                    //Não funcionar fora do ambiente da Brisanet.
-                    // O código está preparado para a chamada real
+                    // ATENÇÃO: Este endpoint é uma rede local e pode não funcionar fora do ambiente da Brisanet.
+                    // O código está preparado para a chamada real, mas pode resultar em erro de rede.
                     const response = await fetch(`http://172.26.50.141:800/operadora?num=${numOnly}`);
                     
                     if (!response.ok) {
