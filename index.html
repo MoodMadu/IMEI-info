@@ -150,7 +150,7 @@
     </section>
 
     <!-- Modal de Confirmação para Limpar Histórico -->
-    <div id="confirm-clear-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div id="confirm-clear-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity50 overflow-y-auto h-full w-full z-50">
         <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white modal-fade-in">
             <div class="mt-3 text-center">
                 <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
@@ -258,7 +258,7 @@
             return `em ${date.toLocaleDateString('pt-BR')}`;
         };
 
-        // Modificado: displayHistory para exibir detalhes de cada entrada duplicada e mostrar "Buscado em" sem hover
+        // Modificado: displayHistory para exibir detalhes de cada entrada duplicada e mostrar "Buscado em" apenas ao expandir
         const displayHistory = () => {
             historyList.innerHTML = '';
             const history = getHistory();
@@ -287,37 +287,59 @@
                 const date = new Date(mostRecentEntry.timestamp);
                 const formattedDate = settings.dateFormat === 'relative' ? formatRelativeTime(mostRecentEntry.timestamp) : date.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
                 
+                // additionalInfoHTML for the main (collapsed) view - remains empty for both device and IMEI now
                 let additionalInfoHTML = '';
-                if (mostRecentEntry.type === 'imei') {
-                    if (mostRecentEntry.originalImei) additionalInfoHTML = `<div class="text-xs text-orange-600 mt-1 pl-8">Corrigido de: <span class="font-mono">${mostRecentEntry.originalImei}</span></div>`;
-                    else additionalInfoHTML = `<div class="text-xs text-green-600 mt-1 pl-8">IMEI válido</div>`;
+
+                let expandedDetailsContent = ''; 
+
+                // Add details for the most recent entry if it's a device or IMEI
+                if (mostRecentEntry.type === 'device') {
+                    expandedDetailsContent += `<div class="flex justify-between items-center text-xs text-zinc-500 border-t border-zinc-200/50 pt-2"><span>Buscado em: <span class="font-medium capitalize">${mostRecentEntry.site}</span></span><span>${formattedDate}</span></div>`;
+                } else if (mostRecentEntry.type === 'imei') {
+                    const imeiOriginalFeedback = mostRecentEntry.imeiFeedback || 'IMEI consultado';
+                    expandedDetailsContent += `<div class="flex justify-between items-center text-xs ${mostRecentEntry.imeiColorClass || 'text-zinc-500'} border-t border-zinc-200/50 pt-2"><span>${mostRecentEntry.imeiIcon || ''} ${imeiOriginalFeedback.replace(/<\/?strong[^>]*>/g, '')}</span><span>${formattedDate}</span></div>`;
                 }
-                
+
+
+                // Add older entries' details
+                const olderEntries = group.slice(1);
+                if (olderEntries.length > 0) {
+                    olderEntries.forEach(entry => {
+                        const olderDate = new Date(entry.timestamp);
+                        const olderFormattedDate = settings.dateFormat === 'relative' ? formatRelativeTime(entry.timestamp) : olderDate.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                        let detail = '';
+                        if (entry.type === 'device') {
+                            detail = `em <em>${ALL_SITES[entry.site]}</em>`;
+                        } else if (entry.type === 'imei') {
+                            // Limpa tags HTML do feedback para exibição compacta no histórico
+                            detail = entry.imeiFeedback ? `(${entry.imeiFeedback.replace(/<\/?strong[^>]*>/g, '')})` : ''; 
+                        }
+                        expandedDetailsContent += `<div class="flex justify-between items-center text-xs text-zinc-500 border-t border-zinc-200/50 pt-2"><span>Buscado novamente ${detail}</span><span>${olderFormattedDate}</span></div>`;
+                    });
+                }
+
                 let duplicatesHTML = '';
-                if (isDuplicateGroup) {
-                    const olderEntries = group.slice(1);
-                    duplicatesHTML = `<div id="duplicates-${mostRecentEntry.timestamp}" class="duplicates-container hidden pl-12 pr-4 pb-3 space-y-2">
-                        ${olderEntries.map(entry => {
-                            const olderDate = new Date(entry.timestamp);
-                            const olderFormattedDate = settings.dateFormat === 'relative' ? formatRelativeTime(entry.timestamp) : olderDate.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-                            let detail = '';
-                            if (entry.type === 'device') {
-                                detail = `em <em>${ALL_SITES[entry.site]}</em>`;
-                            } else if (entry.type === 'imei') {
-                                detail = entry.imeiFeedback ? entry.imeiFeedback : 'IMEI consultado'; // Usar o feedback salvo
-                            }
-                            return `<div class="flex justify-between items-center text-xs text-zinc-500 border-t border-zinc-200/50 pt-2"><span>Buscado novamente ${detail}</span><span>${olderFormattedDate}</span></div>`;
-                        }).join('')}
+                // The duplicatesHTML container should exist if there are actual duplicate entries OR
+                // if it's a device entry that has a site associated (meaning it has expanded details to show)
+                // OR if it's an IMEI entry that has detailed feedback (even if no duplicates).
+                const hasDetailedImeiFeedback = mostRecentEntry.type === 'imei' && (mostRecentEntry.originalImei || mostRecentEntry.imeiFeedback);
+
+                if (isDuplicateGroup || (mostRecentEntry.type === 'device' && mostRecentEntry.site) || hasDetailedImeiFeedback) {
+                     duplicatesHTML = `<div id="duplicates-${mostRecentEntry.timestamp}" class="duplicates-container hidden pl-12 pr-4 pb-3 space-y-2">
+                        ${expandedDetailsContent}
                     </div>`;
                 }
-                // Adicionado: Se for um item de dispositivo principal, e não um grupo expandido,
-                // adiciona o "Buscado em:" na linha principal
-                if (mostRecentEntry.type === 'device' && !isDuplicateGroup) {
-                    additionalInfoHTML = `<div class="text-xs text-zinc-500 mt-1 pl-8">Buscado em: <span class="font-medium capitalize">${mostRecentEntry.site}</span></div>`;
-                }
 
+                // Determine if an "expand" button should be shown.
+                // It should show if there are duplicates (more than one entry in the group)
+                // OR if it's a device entry with a site (and thus has "Buscado em" details to show upon expansion)
+                // OR if it's an IMEI entry that has detailed feedback (and thus has details to show upon expansion).
+                const shouldShowExpandButton = isDuplicateGroup || (mostRecentEntry.type === 'device' && mostRecentEntry.site) || hasDetailedImeiFeedback;
 
-                const expandButtonHTML = isDuplicateGroup ? `<button class="expand-duplicates-btn text-xs text-blue-600 hover:underline" data-target="duplicates-${mostRecentEntry.timestamp}" data-count="${group.length - 1}">Ver ${group.length - 1} mais</button>` : '';
+                // Customize the text of the expand button.
+                // If there are duplicates, show "Ver X mais". Otherwise, if it's a device or IMEI with details, show "Ver detalhes".
+                const finalExpandButtonText = isDuplicateGroup ? `Ver ${group.length - 1} mais` : 'Ver detalhes';
+                const finalExpandButtonHTML = shouldShowExpandButton ? `<button class="expand-duplicates-btn text-xs text-blue-600 hover:underline" data-target="duplicates-${mostRecentEntry.timestamp}" data-count="${isDuplicateGroup ? group.length - 1 : 0}">${finalExpandButtonText}</button>` : '';
 
                 const li = document.createElement('li');
                 li.className = "history-item-container bg-white/50 rounded-lg overflow-hidden transition-colors duration-200";
@@ -334,7 +356,7 @@
                             <div class="flex items-center pl-2">
                                 <div class="flex flex-col items-end mr-3 text-right">
                                     <span class="text-xs text-zinc-400 pointer-events-none shrink-0">${formattedDate}</span>
-                                    ${expandButtonHTML}
+                                    ${finalExpandButtonHTML}
                                 </div>
                                 <div class="flex items-center">
                                    <button class="copy-history-btn p-1 text-zinc-400 hover:text-blue-600" title="Copiar">${copyIconSVG}</button>
