@@ -2,761 +2,531 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon-brisanet.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telefonia N2</title>
-
-  <link rel="icon" type="image/png" href="favicon-brisanet.png">
-
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Dashboard N2</title>
     
-    <!-- Google Fonts: Inter -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+        body { font-family: 'Inter', sans-serif; background-color: #111827; color: #d1d5db; }
+        :root {
+            --briz-panel-bg: #1f2937;
+            --briz-border: #374151;
+            --briz-orange: #f97316;
+            --briz-orange-hover: #fb923c;
+            --status-andamento: #eab308; /* yellow-500 */
+            --status-concluido: #22c55e; /* green-500 */
+            --status-fechado: #6b7280;   /* gray-500 */
+            --resolution-tn2: #3b82f6;      
+            --resolution-tn3: #8b5cf6;      
+            --resolution-tba: #db2777;
         }
-        input:focus { caret-color: #3b82f6; }
-        
-        /* Estilo para toggle switch */
-        .toggle-checkbox:checked {
-            right: 0;
-            border-color: #3b82f6;
-        }
-        .toggle-checkbox:checked + .toggle-label {
-            background-color: #3b82f6;
-        }
-        /* Animação para o modal */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        .modal-fade-in {
-            animation: fadeIn 0.2s ease-out forwards;
-        }
-        .duplicates-container {
-            transition: all 0.3s ease-in-out;
-        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--briz-panel-bg); }
+        ::-webkit-scrollbar-thumb { background: var(--briz-orange); border-radius: 10px; }
+        .panel { background-color: var(--briz-panel-bg); border: 1px solid var(--briz-border); border-radius: 8px; }
+        #map { height: 100%; width: 100%; border-radius: 8px; z-index: 0; }
+        .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(0.8) contrast(1); }
+        .leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--briz-panel-bg); color: #f3f4f6; border: 1px solid var(--briz-orange); }
+        #add-ticket-modal { background-color: rgba(0, 0, 0, 0.7); }
     </style>
-
 </head>
-<body class="bg-zinc-100 text-zinc-900">
 
-    <!-- Cabeçalho de Navegação -->
-    <header class="sticky top-0 z-40 bg-white/70 backdrop-blur-lg border-b border-zinc-200">
-        <div class="max-w-5xl mx-auto px-4">
-            <nav class="flex items-center justify-center h-16">
-                <ul class="flex items-center space-x-2 md:space-x-4" id="nav-menu">
-                    <li><a href="#" data-view="main" class="menu-item text-sm md:text-base px-3 py-2 rounded-lg transition-colors duration-200">Busca</a></li>
-                    <li><a href="#" data-view="settings" class="menu-item text-sm md:text-base px-3 py-2 rounded-lg transition-colors duration-200">Ajustes</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
+<body class="w-full min-h-screen p-4 lg:p-6">
 
-    <!-- Visualização Principal -->
-    <main id="main-view" class="hidden max-w-3xl mx-auto p-4 sm:p-6 md:p-12">
-        <div class="text-center">
-            <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-zinc-900">Faça sua busca agora</h1>
-            <p class="mt-4 text-base sm:text-lg text-zinc-600">Digite um IMEI ou o modelo de um aparelho.</p>
-        </div>
-        <div class="relative mt-10" id="search-container">
-            <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none z-10"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-zinc-400"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></div>
-            <input 
-                id="unified-search-input" 
-                type="text" 
-                placeholder="IMEI ou Ex: Galaxy S24 Ultra" 
-                autocomplete="off" 
-                class="relative w-full p-4 pl-12 text-base bg-zinc-200/50 border border-transparent rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-200"
-                aria-label="Campo de busca para IMEI ou modelo do dispositivo"
-                role="searchbox"
-                aria-expanded="false"
-                aria-autocomplete="list"
-            >
-            <div id="autocomplete-container" class="absolute top-full mt-2 w-full bg-white border border-zinc-200 rounded-xl shadow-lg overflow-hidden z-20 transition-all duration-200 ease-out opacity-0 scale-95 pointer-events-none">
-                <!-- As sugestões serão inseridas aqui -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full max-w-screen-2xl mx-auto">
+        
+        <aside class="col-span-1 lg:col-span-4 flex flex-col gap-6">
+            <div class="panel p-4 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <img src="https://placehold.co/50x50/f97316/ffffff?text=B" alt="Avatar" class="rounded-full">
+                    <div>
+                        <h2 class="font-bold text-lg text-white">Equipe de Suporte</h2>
+                        <p class="text-sm text-gray-400">Telefonia Móvel</p>
+                    </div>
+                </div>
+                <button class="text-gray-400 hover:text-white transition-colors" title="Sair"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></button>
             </div>
-        </div>
-    </main>
-    
-    <!-- Visualização de Ajustes -->
-    <section id="settings-view" class="hidden max-w-3xl mx-auto p-4 sm:p-6 md:p-12">
-        <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-center">Ajustes</h1>
-        <div class="mt-12 space-y-10">
 
-            <!-- Seção: Comportamento da Busca -->
-            <div class="space-y-6">
-                 <h2 class="text-2xl font-bold tracking-tight">Busca</h2>
-                <!-- Ação da Tecla Enter -->
-                <div>
-                    <label class="text-base font-medium text-zinc-900">Ação da tecla "Enter"</label>
-                    <p class="text-sm text-zinc-600">Escolha o que acontece ao pressionar "Enter" na barra de busca.</p>
-                    <fieldset class="mt-4">
-                        <div class="space-y-4">
-                            <div class="flex items-center"><input id="enter-smart" name="enter-action" type="radio" value="smart" class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"><label for="enter-smart" class="ml-3 block text-sm font-medium text-zinc-700">Busca Inteligente (padrão)</label></div>
-                            <div class="flex items-center"><input id="enter-first" name="enter-action" type="radio" value="first" class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"><label for="enter-first" class="ml-3 block text-sm font-medium text-zinc-700">Selecionar primeira sugestão</label></div>
-                            <div class="flex items-center"><input id="enter-none" name="enter-action" type="radio" value="none" class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"><label for="enter-none" class="ml-3 block text-sm font-medium text-zinc-700">Nenhuma ação</label></div>
+            <div id="info-panel" class="panel p-4"></div>
+
+            <div class="panel p-4 flex flex-col h-[50vh] lg:h-auto lg:flex-grow">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-bold text-xl text-white">Acompanhamento de Chamados</h3>
+                    <button id="add-ticket-btn" title="Adicionar Chamado" class="bg-orange-600 hover:bg-orange-500 text-white font-bold w-8 h-8 rounded-full flex items-center justify-center transition-colors">+</button>
+                </div>
+                <div class="mb-4 grid grid-cols-2 lg:grid-cols-4 gap-2">
+                    <button data-filter="all" class="filter-btn flex-1 bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-2 rounded transition-colors text-sm">Todos</button>
+                    <button data-filter="Em Andamento" class="filter-btn flex-1 bg-yellow-600 hover:bg-yellow-500 text-white font-bold py-2 px-2 rounded transition-colors text-sm">Em Andamento</button>
+                    <button data-filter="Concluído" class="filter-btn flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-2 rounded transition-colors text-sm">Concluídos</button>
+                    <button data-filter="Fechado" class="filter-btn flex-1 bg-gray-800 hover:bg-gray-700 text-white font-bold py-2 px-2 rounded transition-colors text-sm">Fechados</button>
+                </div>
+                <div id="tickets-list" class="overflow-y-auto pr-2 space-y-3 flex-grow"></div>
+            </div>
+        </aside>
+        
+        <main class="col-span-1 lg:col-span-8 flex flex-col gap-4 h-[85vh]">
+            <form id="search-form" class="panel p-2 flex gap-2 relative">
+                <input id="search-input" type="text" placeholder="Buscar cidade ou coordenadas..." class="flex-grow bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-orange-500" autocomplete="off">
+                <div id="search-suggestions" class="absolute top-full left-0 right-0 z-10 w-full bg-gray-800 border border-gray-600 rounded mt-1 max-h-48 overflow-y-auto hidden"></div>
+                <button type="submit" class="bg-orange-600 hover:bg-orange-500 text-white font-bold py-2 px-4 rounded transition-colors">Buscar</button>
+            </form>
+            <div class="panel p-1 flex-grow">
+                <div id="map"></div>
+            </div>
+        </main>
+    </div>
+
+    <div id="add-ticket-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="panel w-full max-w-2xl">
+            <form id="ticket-form" class="p-6">
+                <h3 class="font-bold text-xl text-white mb-6">Novo Chamado de Suporte</h3>
+                <div class="space-y-4 max-h-[70vh] overflow-y-auto pr-4">
+                    <!-- Basic Info -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input name="id" type="text" placeholder="Nº do Ticket (Ex: 123456)" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white" required>
+                        <input name="line" type="text" placeholder="Nº da Linha do Cliente" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white" required>
+                    </div>
+                    <!-- Support Type -->
+                    <div>
+                        <label class="text-sm text-gray-400">Tipo de Suporte</label>
+                        <div id="support-type-radios" class="flex gap-4 mt-1">
+                            <label class="flex items-center gap-2"><input type="radio" name="supportType" value="FWA" class="form-radio bg-gray-700 text-orange-600" checked> FWA</label>
+                            <label class="flex items-center gap-2"><input type="radio" name="supportType" value="Chip Movel" class="form-radio bg-gray-700 text-orange-600"> Chip Móvel</label>
                         </div>
-                    </fieldset>
-                </div>
-                <!-- Correção de IMEI -->
-                <div class="flex items-center justify-between"><span class="flex-grow flex flex-col"><label for="setting-suggest-imei" class="text-base font-medium text-zinc-900">Sugerir correção de IMEI</label><span class="text-sm text-zinc-600">Calcula e exibe um dígito verificador para IMEIs.</span></span><div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in"><input type="checkbox" name="setting-suggest-imei" id="setting-suggest-imei" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/><label for="setting-suggest-imei" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label></div></div>
-                <!-- Fontes de Busca -->
-                <div>
-                    <label class="text-base font-medium text-zinc-900">Fontes de busca de aparelhos</label>
-                     <p class="text-sm text-zinc-600">Ative ou desative os sites usados para buscar fichas técnicas.</p>
-                    <fieldset class="mt-4 space-y-2" id="search-sources-fieldset"></fieldset>
-                </div>
-            </div>
+                    </div>
+                     <!-- City with Autocomplete -->
+                    <div class="relative">
+                        <input name="city" id="city-input" type="text" placeholder="Cidade" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white" required autocomplete="off">
+                        <div id="city-suggestions" class="absolute z-10 w-full bg-gray-800 border border-gray-600 rounded mt-1 max-h-48 overflow-y-auto hidden"></div>
+                    </div>
+                    <!-- Categories -->
+                    <select name="category" id="category-select" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white" required><option value="">Selecione a Categoria Principal</option></select>
+                    <select name="subcategory" id="subcategory-select" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white" required><option value="">Selecione a Subcategoria</option></select>
+                    
+                    <!-- Dynamic Fields: Site/App -->
+                    <div id="site-app-details-group" class="hidden space-y-4 p-3 bg-gray-800 rounded-lg">
+                        <h4 class="text-sm font-semibold text-gray-300">Detalhes do Site/App</h4>
+                        <input name="appName" type="text" placeholder="Nome do App/Site" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white">
+                        <input name="appLink" type="text" placeholder="Link (URL)" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white">
+                    </div>
 
-            <div class="border-t border-zinc-200"></div>
-
-            <!-- Seção: Histórico -->
-            <div class="space-y-6">
-                <h2 class="text-2xl font-bold tracking-tight">Histórico</h2>
-                 <!-- Salvar Histórico -->
-                <div class="flex items-center justify-between"><span class="flex-grow flex flex-col"><label for="setting-save-history" class="text-base font-medium text-zinc-900">Salvar histórico de buscas</label><span class="text-sm text-zinc-600">Desative para impedir que novas buscas sejam salvas.</span></span><div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in"><input type="checkbox" name="setting-save-history" id="setting-save-history" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/><label for="setting-save-history" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label></div></div>
-                <!-- Mostrar Buscas Anteriores -->
-                <div class="flex items-center justify-between"><span class="flex-grow flex flex-col"><label for="setting-show-past" class="text-base font-medium text-zinc-900">Mostrar buscas anteriores nas sugestões</label><span class="text-sm text-zinc-600">Exibe seu histórico ao digitar um modelo de aparelho.</span></span><div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in"><input type="checkbox" name="setting-show-past" id="setting-show-past" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/><label for="setting-show-past" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label></div></div>
-                <!-- Formato de Data e Hora -->
-                <div>
-                    <label class="text-base font-medium text-zinc-900">Formato de Data e Hora</label>
-                    <fieldset class="mt-2">
-                        <div class="flex items-center space-x-6">
-                            <div class="flex items-center"><input id="date-relative" name="date-format" type="radio" value="relative" class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"><label for="date-relative" class="ml-2 block text-sm font-medium text-zinc-700">Relativo (ex: há 5 minutos)</label></div>
-                            <div class="flex items-center"><input id="date-absolute" name="date-format" type="radio" value="absolute" class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"><label for="date-absolute" class="ml-2 block text-sm font-medium text-zinc-700">Absoluto (ex: 15/06/2025, 15:51)</label></div>
+                    <!-- Dynamic Fields: Calls -->
+                    <div id="call-details-group" class="hidden space-y-4 p-3 bg-gray-800 rounded-lg">
+                        <div id="origin-numbers-container">
+                            <label class="text-sm font-semibold text-gray-300">Números de Origem (quem ligou para o cliente)</label>
                         </div>
-                    </fieldset>
-                </div>
-                 <!-- Limpeza Segura do Histórico -->
-                <div class="flex items-center justify-between"><span class="flex-grow flex flex-col"><label for="setting-secure-delete" class="text-base font-medium text-zinc-900">Exigir confirmação para limpar o histórico</label><span class="text-sm text-zinc-600">Ative para evitar a exclusão acidental de todo o histórico.</span></span><div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in"><input type="checkbox" name="setting-secure-delete" id="setting-secure-delete" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/><label for="setting-secure-delete" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label></div></div>
-            </div>
-            
-             <!-- Área do Histórico -->
-            <div class="p-4 sm:p-6 bg-zinc-200/50 rounded-xl">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg sm:text-xl font-semibold">Seu Histórico</h2>
-                    <button id="clear-history-btn" class="text-sm text-blue-600 hover:underline transition-transform active:scale-95">Limpar Tudo</button>
-                </div>
-                <ul id="history-list" class="space-y-3"></ul>
-                <div id="history-toggle-container" class="mt-4 text-center"></div>
-            </div>
-        </div>
-    </section>
+                         <div id="destination-numbers-container" class="mt-4">
+                            <label class="text-sm font-semibold text-gray-300">Números de Destino (para quem o cliente ligou)</label>
+                        </div>
+                    </div>
+                    
+                    <!-- Status & Resolution -->
+                    <select name="status" id="status-select" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white" required>
+                        <option value="Em Andamento">Em Andamento</option>
+                        <option value="Concluído">Concluído</option>
+                        <option value="Fechado">Fechado</option>
+                    </select>
 
-    <!-- Modal de Confirmação para Limpar Histórico -->
-    <div id="confirm-clear-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white modal-fade-in">
-            <div class="mt-3 text-center">
-                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
-                    <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    <div id="resolution-details-group" class="hidden space-y-4 p-3 bg-gray-800 rounded-lg">
+                        <h4 class="text-sm font-semibold text-gray-300">Detalhes da Resolução</h4>
+                        <select name="resolutionType" id="resolution-type-select" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white">
+                            <option value="">Selecione o tipo</option>
+                            <option value="Tratado TN2">Tratado TN2</option>
+                            <option value="Tratado TN3">Tratado TN3</option>
+                            <option value="Tratado TBA">Tratado TBA</option>
+                        </select>
+                        <div id="ba-number-group" class="hidden">
+                            <input name="ba" type="text" placeholder="Número do BA" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white">
+                        </div>
+                        <div id="returned-tn1-group" class="hidden">
+                             <label class="flex items-center gap-2 text-sm text-gray-300">
+                                <input type="checkbox" name="returnedToTN1" class="form-checkbox bg-gray-700 text-orange-600"> Retornado ao TN1
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <textarea name="observation" placeholder="Observação: Detalhamento do caso, testes realizados, etc." rows="4" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white"></textarea>
                 </div>
-                <h3 class="text-lg leading-6 font-medium text-gray-900 mt-2">Limpar Histórico</h3>
-                <div class="mt-2 px-7 py-3">
-                    <p class="text-sm text-gray-500">
-                        Você tem certeza que deseja apagar todo o seu histórico de buscas? Esta ação não pode ser desfeita.
-                    </p>
+                <div class="mt-6 flex justify-end gap-3">
+                    <button type="button" id="cancel-ticket-btn" class="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded">Cancelar</button>
+                    <button type="submit" id="submit-ticket-btn" class="bg-orange-600 hover:bg-orange-500 text-white font-bold py-2 px-4 rounded">Criar Chamado</button>
                 </div>
-                <div class="items-center px-4 py-3">
-                    <button id="cancel-clear-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md w-full sm:w-auto hover:bg-gray-300 mb-2 sm:mb-0 sm:mr-2">Cancelar</button>
-                    <button id="confirm-clear-action-btn" class="px-4 py-2 bg-red-600 text-white rounded-md w-full sm:w-auto hover:bg-red-700">Sim, Limpar Tudo</button>
-                </div>
-            </div>
+            </form>
         </div>
     </div>
 
     <script>
-        // --- CONSTANTES E CONFIGURAÇÕES ---
-        const HISTORY_LIMIT = 25;
-        const COMPACT_HISTORY_LIMIT = 5;
-        const DEBOUNCE_DELAY = 300;
-        const ALL_SITES = { kimovil: 'Kimovil', maiscelular: 'MaisCelular', gsmarena: 'GSMArena' };
+    const problemCategories = {
+        "Problemas de Ligação": ["Não origina chamada", "Não origina para número específico", "Não origina para 0800/9090", "Restrição de ligação (VIVO, TIM, CLARO)"],
+        "Anomalias em Chamadas": ["Chamada cai ao atender", "Falha em chamada a cobrar", "Número aparece como oculto", "Não recebe chamada de alguns números"],
+        "Problemas de Mensagens": ["Não envia/recebe SMS", "Problemas com SMS de aplicativos", "Desativar caixa postal"],
+        "Rede e Conectividade": ["Reinstalação de eSIM", "Dados móveis não funcionam", "Não acessa site/app específico"]
+    };
+    const makingCallSubcategories = ["Não origina chamada", "Não origina para número específico", "Não origina para 0800/9090", "Restrição de ligação (VIVO, TIM, CLARO)"];
+    const receivingCallSubcategories = ["Não recebe chamada de alguns números"];
 
-        // --- SELETORES DE ELEMENTOS ---
-        const mainView = document.getElementById('main-view');
-        const settingsView = document.getElementById('settings-view');
-        const searchInput = document.getElementById('unified-search-input');
-        const autocompleteContainer = document.getElementById('autocomplete-container');
-        const searchContainer = document.getElementById('search-container');
-        const menuItems = document.querySelectorAll('.menu-item');
-        const historyList = document.getElementById('history-list');
-        const historyToggleContainer = document.getElementById('history-toggle-container');
-        const clearHistoryBtn = document.getElementById('clear-history-btn');
-        const settingsElements = {
-            enterAction: document.querySelectorAll('input[name="enter-action"]'),
-            suggestImeiCorrection: document.getElementById('setting-suggest-imei'),
-            searchSources: document.getElementById('search-sources-fieldset'),
-            saveHistory: document.getElementById('setting-save-history'),
-            showPastSearches: document.getElementById('setting-show-past'),
-            dateFormat: document.querySelectorAll('input[name="date-format"]'),
-            secureHistoryDeletion: document.getElementById('setting-secure-delete'),
-        };
-        const modal = {
-            container: document.getElementById('confirm-clear-modal'),
-            cancelBtn: document.getElementById('cancel-clear-btn'),
-            confirmBtn: document.getElementById('confirm-clear-action-btn'),
-        };
+
+    let tickets = [];
+    let map;
+    let ticketMarkers = {};
+    let debounceTimer;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        initMap();
+        populateCategoryFilter();
+        renderAnalytics();
+        renderTickets('all');
+        setupEventListeners();
+        updateFormVisibility(); // Initial call to set form state
+    });
+
+    function initMap() {
+        map = L.map('map').setView([-5.089, -39.304], 7);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        updateTicketMarkers();
+    }
+    
+    function getStatusColor(status) {
+        const colors = { 'Em Andamento': 'var(--status-andamento)', 'Concluído': 'var(--status-concluido)', 'Fechado': 'var(--status-fechado)' };
+        return colors[status] || '#888';
+    }
+
+    function createTicketIcon(status) {
+        return L.divIcon({
+            className: 'custom-div-icon',
+            html: `<div style="background-color:${getStatusColor(status)};" class="w-5 h-5 rounded-full border-2 border-white shadow-md"></div>`,
+            iconSize: [20, 20], iconAnchor: [10, 10]
+        });
+    }
+
+    function updateTicketMarkers() {
+        Object.values(ticketMarkers).forEach(marker => map.removeLayer(marker));
+        ticketMarkers = {};
+        tickets.forEach(ticket => {
+            const marker = L.marker(ticket.coords, { icon: createTicketIcon(ticket.status) }).addTo(map);
+            marker.bindPopup(`<b>Ticket:</b> ${ticket.id}<br><b>Cidade:</b> ${ticket.city}`);
+            marker.on('click', () => {
+                renderTicketDetails(ticket.id);
+                map.flyTo(ticket.coords, 12);
+            });
+            ticketMarkers[ticket.id] = marker;
+        });
+    }
+    
+    const infoPanel = document.getElementById('info-panel');
+    const ticketsList = document.getElementById('tickets-list');
+    
+    function renderAnalytics() {
+        const cityCounts = tickets.reduce((acc, t) => { acc[t.city] = (acc[t.city] || 0) + 1; return acc; }, {});
+        const sortedCities = Object.entries(cityCounts).sort((a, b) => b[1] - a[1]).slice(0, 3);
+        const problemCounts = tickets.reduce((acc, t) => { acc[t.subcategory] = (acc[t.subcategory] || 0) + 1; return acc; }, {});
+        const sortedProblems = Object.entries(problemCounts).sort((a, b) => b[1] - a[1]).slice(0, 3);
         
-        // --- ESTADO DA APLICAÇÃO ---
-        let selectedSuggestionIndex = -1;
-        let isHistoryExpanded = false;
-        let settings = {};
+        infoPanel.innerHTML = `
+            <h3 class="font-bold text-xl mb-3 text-white">Análise de Chamados</h3>
+            <div class="space-y-4">
+                <div>
+                    <h4 class="font-semibold text-gray-300 mb-2">Cidades com mais chamados</h4>
+                    <ul class="space-y-1 text-sm">${sortedCities.map(([city, count]) => `<li class="flex justify-between"><span>${city}</span> <span class="font-bold text-orange-400">${count}</span></li>`).join('') || '<li class="text-gray-500 italic">Nenhum chamado registrado.</li>'}</ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-300 mb-2">Problemas mais frequentes</h4>
+                    <ul class="space-y-1 text-sm">${sortedProblems.map(([prob, count]) => `<li class="flex justify-between"><span>${prob}</span> <span class="font-bold text-orange-400">${count}</span></li>`).join('') || '<li class="text-gray-500 italic">Nenhum chamado registrado.</li>'}</ul>
+                </div>
+            </div>`;
+    }
 
-        // --- ÍCONES SVG ---
-        const searchIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search text-zinc-400 mr-3 shrink-0" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/></svg>`;
-        const historyIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-history text-zinc-400 mr-3 shrink-0" viewBox="0 0 16 16"><path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022l-.074.997zM5.56 1.838a6.99 6.99 0 0 0-1.225.434l.485.875a6 6 0 0 1 1.037-.375l-.297-.934zM8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0"/></svg>`;
-        const copyIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5-.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/></svg>`;
-        const deleteIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/></svg>`;
-        const checkCircleIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/></svg>`;
-        const warningCircleIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle-fill" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4m.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2"/></svg>`;
-        const infoCircleIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill" viewBox="0 0 16 16"><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2"/></svg>`;
+    function renderTicketDetails(ticketId) {
+        const ticket = tickets.find(t => t.id === ticketId);
+        if (!ticket) { renderAnalytics(); return; }
 
-        // --- BASE DE DADOS DE PALAVRAS-CHAVE ---
-        const brandKeywords = { 'Xiaomi': ['redmi', 'poco', 'mi'], 'Samsung': ['galaxy', 'note'], 'Apple': ['iphone'], 'Motorola': ['moto', 'edge', 'razr'], 'Google': ['pixel'], 'Huawei': ['p20', 'p30', 'p40', 'p50', 'p60', 'mate', 'nova'], 'OnePlus': ['oneplus'], 'Sony': ['xperia'], 'Oppo': ['oppo', 'find', 'reno'], 'Asus': ['zenfone', 'rog'], 'Realme': ['realme'], 'Vivo': ['vivo'], 'Nokia': ['nokia'], 'Lenovo': ['legion'], 'Honor': ['honor'] };
-        const brandPriorityOrder = ['Xiaomi', 'Samsung', 'Apple', 'Motorola', 'Google', 'Huawei', 'OnePlus', 'Sony', 'Oppo', 'Asus', 'Realme', 'Vivo', 'Nokia', 'Lenovo', 'Honor'];
+        let detailsHtml = `<div class="flex justify-between items-start">
+            <h3 class="font-bold text-xl mb-3 text-white">Detalhes do Ticket</h3>
+            <button id="back-to-analytics" class="text-xs text-orange-400 hover:underline">Voltar</button>
+        </div>
+        <div class="space-y-3 text-sm max-h-[65vh] overflow-y-auto pr-2">
+            <div><p class="text-xs text-gray-400">TICKET ID</p><p class="font-semibold text-white">${ticket.id}</p></div>
+            <div><p class="text-xs text-gray-400">STATUS</p><p class="font-bold" style="color:${getStatusColor(ticket.status)}">${ticket.status}</p></div>
+            <div><p class="text-xs text-gray-400">TIPO SUPORTE</p><p class="font-semibold text-white">${ticket.supportType}</p></div>`;
 
-        // --- FUNÇÕES DE LÓGICA E UTILITÁRIOS ---
-        const debounce = (func, wait) => { let timeout; return function executedFunction(...args) { const later = () => { clearTimeout(timeout); func(...args); }; clearTimeout(timeout); timeout = setTimeout(later, wait); }; };
+        if (ticket.status === 'Concluído' && ticket.resolutionType) {
+            detailsHtml += `<div><p class="text-xs text-gray-400">RESOLUÇÃO</p><p class="font-semibold text-white">${ticket.resolutionType} ${ticket.returnedToTN1 ? '(Retornado ao TN1)' : ''}</p></div>`;
+            if (ticket.ba) {
+                detailsHtml += `<div><p class="text-xs text-gray-400">NÚMERO BA</p><p class="font-semibold text-white">${ticket.ba}</p></div>`;
+            }
+        }
+
+        detailsHtml += `
+            <div><p class="text-xs text-gray-400">LINHA</p><p class="font-semibold text-white">${ticket.line}</p></div>
+            <div><p class="text-xs text-gray-400">CIDADE</p><p class="font-semibold text-white">${ticket.city}</p></div>
+            <div><p class="text-xs text-gray-400">CATEGORIA</p><p class="font-semibold text-white">${ticket.category} > ${ticket.subcategory}</p></div>`;
+
+        if (ticket.appDetails) {
+            detailsHtml += `<div><p class="text-xs text-gray-400">DETALHES APP/SITE</p><p class="font-semibold text-white">${ticket.appDetails.name} (<a href="${ticket.appDetails.link}" target="_blank" class="text-orange-400 hover:underline">link</a>)</p></div>`;
+        }
+        if (ticket.origins && ticket.origins.length > 0) {
+            detailsHtml += `<div><p class="text-xs text-gray-400">NÚMEROS DE ORIGEM</p><ul class="list-disc list-inside">${ticket.origins.map(n => `<li class="font-semibold text-white">${n}</li>`).join('')}</ul></div>`;
+        }
+        if (ticket.destinations && ticket.destinations.length > 0) {
+            detailsHtml += `<div><p class="text-xs text-gray-400">NÚMEROS DE DESTINO</p><ul class="list-disc list-inside">${ticket.destinations.map(n => `<li class="font-semibold text-white">${n}</li>`).join('')}</ul></div>`;
+        }
+        if (ticket.observation) {
+            detailsHtml += `<div><p class="text-xs text-gray-400">OBSERVAÇÃO</p><p class="font-semibold text-white whitespace-pre-wrap">${ticket.observation}</p></div>`;
+        }
+        detailsHtml += `</div>`;
+        infoPanel.innerHTML = detailsHtml;
+        document.getElementById('back-to-analytics').addEventListener('click', renderAnalytics);
+    }
+    
+    function renderTickets(filter) {
+        ticketsList.innerHTML = '';
+        const filtered = tickets.filter(t => filter === 'all' || t.status === filter);
+        if (filtered.length === 0) {
+            ticketsList.innerHTML = '<p class="text-center text-gray-500 italic mt-4">Nenhum chamado encontrado.</p>';
+            return;
+        }
+        filtered.forEach(ticket => {
+            const ticketEl = document.createElement('div');
+            ticketEl.className = `p-3 bg-gray-800 rounded-lg border-l-4 shadow-md cursor-pointer hover:bg-gray-700`;
+            ticketEl.style.borderColor = getStatusColor(ticket.status);
+            ticketEl.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <div><p class="font-bold text-white text-sm">${ticket.subcategory}</p><p class="text-xs text-gray-400">Ticket: ${ticket.id}</p></div>
+                    <span class="text-xs font-bold" style="color:${getStatusColor(ticket.status)}">${ticket.status}</span>
+                </div>`;
+            ticketEl.addEventListener('click', () => renderTicketDetails(ticket.id));
+            ticketsList.appendChild(ticketEl);
+        });
+    }
+
+    async function getCoordsForCity(cityName) {
+        if (!cityName) return null;
+        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cityName)}&countrycodes=br&format=json&limit=1&addressdetails=1`;
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Network response was not ok');
+            const data = await response.json();
+            return (data && data.length > 0) ? [parseFloat(data[0].lat), parseFloat(data[0].lon)] : null;
+        } catch (error) {
+            console.error("Failed to fetch coordinates: ", error);
+            return null;
+        }
+    }
+
+    function populateCategoryFilter(isFWA = false) {
+        const catSelect = document.getElementById('category-select');
+        const callCategories = ["Problemas de Ligação", "Anomalias em Chamadas"];
         
-        const getHistory = () => JSON.parse(localStorage.getItem('unifiedHistory')) || [];
-        
-        const saveToHistory = (entry) => {
-            if (!settings.saveHistory) return;
-            let history = getHistory();
-            history.unshift(entry);
-            history = history.slice(0, HISTORY_LIMIT);
-            localStorage.setItem('unifiedHistory', JSON.stringify(history));
-        };
-        
-        const formatRelativeTime = (isoString) => {
-            const date = new Date(isoString);
-            const now = new Date();
-            const seconds = Math.round((now - date) / 1000);
-            const minutes = Math.round(seconds / 60);
-            const hours = Math.round(minutes / 60);
-            const days = Math.round(hours / 24);
+        // Preserve selected value if possible
+        const previousValue = catSelect.value;
+        catSelect.innerHTML = '<option value="">Selecione a Categoria Principal</option>';
 
-            if (seconds < 60) return "agora mesmo";
-            if (minutes < 60) return `há ${minutes} min`;
-            if (hours < 24) return `há ${hours}h`;
-            if (days === 1) return "ontem";
-            if (days < 7) return `há ${days} dias`;
-            return `em ${date.toLocaleDateString('pt-BR')}`;
-        };
-
-        const displayHistory = () => {
-            historyList.innerHTML = '';
-            const history = getHistory();
-
-            if (history.length === 0) {
-                historyList.innerHTML = '<li class="text-zinc-500">Nenhuma busca realizada.</li>';
-                historyToggleContainer.innerHTML = '';
+        Object.keys(problemCategories).forEach(cat => {
+            // If FWA, skip call-related categories
+            if (isFWA && callCategories.includes(cat)) {
                 return;
             }
-            
-            const groupedHistory = history.reduce((acc, entry) => {
-                const key = entry.value;
-                if (!acc[key]) acc[key] = [];
-                acc[key].push(entry);
-                return acc;
-            }, {});
+            const option = document.createElement('option');
+            option.value = cat;
+            option.textContent = cat;
+            catSelect.appendChild(option);
+        });
+        
+        // Restore previous selection if still valid
+        if (catSelect.querySelector(`option[value="${previousValue}"]`)) {
+            catSelect.value = previousValue;
+        } else {
+             catSelect.value = '';
+        }
+    }
+    
+    function setupEventListeners() {
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.addEventListener('click', () => renderTickets(btn.dataset.filter)));
+        
+        const modal = document.getElementById('add-ticket-modal');
+        document.getElementById('add-ticket-btn').addEventListener('click', () => {
+            updateFormVisibility();
+            modal.classList.remove('hidden');
+        });
+        document.getElementById('cancel-ticket-btn').addEventListener('click', () => {
+            modal.classList.add('hidden');
+            document.getElementById('ticket-form').reset();
+            document.getElementById('city-suggestions').classList.add('hidden');
+        });
 
-            const uniqueEntryGroups = Object.values(groupedHistory);
-            const groupsToShow = isHistoryExpanded ? uniqueEntryGroups : uniqueEntryGroups.slice(0, COMPACT_HISTORY_LIMIT);
-            
-            groupsToShow.forEach(group => {
-                const mostRecentEntry = group[0];
-                const isDuplicateGroup = group.length > 1;
+        const form = document.getElementById('ticket-form');
+        form.addEventListener('click', (e) => {
+            if (e.target.closest('.add-number-btn')) {
+                const type = e.target.closest('.add-number-btn').dataset.type;
+                const container = document.getElementById(`${type}-numbers-container`);
+                const newInputDiv = document.createElement('div');
+                newInputDiv.className = 'flex items-center gap-2 mt-2';
+                newInputDiv.innerHTML = `<input type="text" name="${type}" placeholder="Nº de ${type === 'origins' ? 'Origem' : 'Destino'}" class="flex-grow bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white"><button type="button" class="remove-number-btn bg-red-600 hover:bg-red-500 text-white w-8 h-8 rounded-full flex-shrink-0">-</button>`;
+                container.appendChild(newInputDiv);
+            }
+            if (e.target.closest('.remove-number-btn')) {
+                e.target.closest('.flex').remove();
+            }
+        });
+        
+        ['support-type-radios', 'category-select', 'subcategory-select', 'status-select', 'resolution-type-select'].forEach(id => {
+            document.getElementById(id).addEventListener('change', updateFormVisibility);
+        });
 
-                const icon = mostRecentEntry.type === 'imei' ? `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-upc-scan" viewBox="0 0 16 16"><path d="M1.5 1a.5.5 0 0 0-.5.5v3a.5.5 0 0 1-1 0v-3A1.5 1.5 0 0 1 1.5 0h3a.5.5 0 0 1 0 1zM11 .5a.5.5 0 0 1 .5-.5h3A1.5 1.5 0 0 1 16 1.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 1-.5-.5M.5 11a.5.5 0 0 1 .5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 1 0 1h-3A1.5 1.5 0 0 1 0 14.5v-3a.5.5 0 0 1 .5-.5m15 0a.5.5 0 0 1 .5.5v3a1.5 1.5 0 0 1-1.5 1.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 1 .5-.5M3 4.5a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0zM6 4.5a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0zM8 4a.5.5 0 0 0-.5.5v7a.5.5 0 0 0 1 0v-7A.5.5 0 0 0 8 4m3 0.5a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0zm2 0a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0z"/></svg>` : `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-phone" viewBox="0 0 16 16"><path d="M11 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM5 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/><path d="M7 14s-1 0-1-1 1-4 1-4 1 3 1 4-1 1-1 1"/></svg>`;
-                const date = new Date(mostRecentEntry.timestamp);
-                const formattedDate = settings.dateFormat === 'relative' ? formatRelativeTime(mostRecentEntry.timestamp) : date.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-                
-                let additionalInfoHTML = '';
-                if (mostRecentEntry.type === 'device') additionalInfoHTML = `<div class="hidden group-hover:block text-xs text-zinc-500 mt-1 pl-8">Buscado em: <span class="font-medium capitalize">${mostRecentEntry.site}</span></div>`;
-                else if (mostRecentEntry.type === 'imei') {
-                    if (mostRecentEntry.originalImei) additionalInfoHTML = `<div class="hidden group-hover:block text-xs text-orange-600 mt-1 pl-8">Corrigido de: <span class="font-mono">${mostRecentEntry.originalImei}</span></div>`;
-                    else additionalInfoHTML = `<div class="hidden group-hover:block text-xs text-green-600 mt-1 pl-8">IMEI válido</div>`;
-                }
-                
-                let duplicatesHTML = '';
-                if (isDuplicateGroup) {
-                    const olderEntries = group.slice(1);
-                    duplicatesHTML = `<div id="duplicates-${mostRecentEntry.timestamp}" class="duplicates-container hidden pl-12 pr-4 pb-3 space-y-2">
-                        ${olderEntries.map(entry => {
-                            const olderDate = new Date(entry.timestamp);
-                            const olderFormattedDate = settings.dateFormat === 'relative' ? formatRelativeTime(entry.timestamp) : olderDate.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-                            return `<div class="flex justify-between items-center text-xs text-zinc-500 border-t border-zinc-200/50 pt-2"><span>Buscado novamente</span><span>${olderFormattedDate}</span></div>`;
-                        }).join('')}
-                    </div>`;
-                }
 
-                const expandButtonHTML = isDuplicateGroup ? `<button class="expand-duplicates-btn text-xs text-blue-600 hover:underline" data-target="duplicates-${mostRecentEntry.timestamp}" data-count="${group.length - 1}">Ver ${group.length - 1} mais</button>` : '';
+        const cityInput = document.getElementById('city-input');
+        cityInput.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => handleCityAutocomplete(cityInput.value, 'city-suggestions'), 300);
+        });
+        document.addEventListener('click', (e) => { if (!e.target.closest('.relative')) document.getElementById('city-suggestions').classList.add('hidden'); });
+        
+        const searchInput = document.getElementById('search-input');
+        searchInput.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => handleCityAutocomplete(searchInput.value, 'search-suggestions'), 300);
+        });
+        document.addEventListener('click', (e) => { if (e.target !== searchInput) document.getElementById('search-suggestions').classList.add('hidden'); });
 
-                const li = document.createElement('li');
-                li.className = "history-item-container bg-white/50 rounded-lg overflow-hidden transition-colors duration-200";
-                li.innerHTML = `
-                    <div class="history-item group" data-value="${mostRecentEntry.value}">
-                        <div class="p-3 flex items-center justify-between">
-                            <div class="flex items-center flex-1 min-w-0 cursor-pointer history-main-action" data-type="${mostRecentEntry.type}" data-value="${mostRecentEntry.value}" data-site="${mostRecentEntry.site || ''}" data-original-imei="${mostRecentEntry.originalImei || ''}">
-                                <span class="mr-3 text-zinc-500 shrink-0">${icon}</span>
-                                <div class="flex-1 truncate">
-                                    <span class="font-medium text-sm pointer-events-none">${mostRecentEntry.value}</span>
-                                    ${additionalInfoHTML}
-                                </div>
-                            </div>
-                            <div class="flex items-center pl-2">
-                                <div class="flex flex-col items-end mr-3 text-right">
-                                    <span class="text-xs text-zinc-400 pointer-events-none shrink-0">${formattedDate}</span>
-                                    ${expandButtonHTML}
-                                </div>
-                                <div class="flex items-center">
-                                   <button class="copy-history-btn p-1 text-zinc-400 hover:text-blue-600" title="Copiar">${copyIconSVG}</button>
-                                   <button class="delete-history-btn p-1 text-zinc-400 hover:text-red-600" title="Excluir">${deleteIconSVG}</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    ${duplicatesHTML}`;
-                historyList.appendChild(li);
+        form.addEventListener('submit', handleAddTicket);
+        document.getElementById('search-form').addEventListener('submit', (e) => handleSearch(e, document.getElementById('search-input').value));
+        infoPanel.addEventListener('click', e => { if (e.target.id === 'back-to-analytics') renderAnalytics(); });
+    }
+
+    function updateFormVisibility() {
+        const form = document.getElementById('ticket-form');
+        const supportType = form.querySelector('input[name="supportType"]:checked').value;
+        const category = form.querySelector('#category-select').value;
+        const subcategory = form.querySelector('#subcategory-select').value;
+        const status = form.querySelector('#status-select').value;
+        const resolutionType = form.querySelector('#resolution-type-select').value;
+
+        const isFWA = supportType === 'FWA';
+        const isCallProblem = ["Problemas de Ligação", "Anomalias em Chamadas"].includes(category);
+        
+        // Update category options based on support type
+        populateCategoryFilter(isFWA);
+
+        // Subcategory logic
+        const subcatSelect = form.querySelector('#subcategory-select');
+        const previousSubcat = subcatSelect.value;
+        subcatSelect.innerHTML = '<option value="">Selecione a Subcategoria</option>';
+        if (category && problemCategories[category]) {
+            problemCategories[category].forEach(sub => {
+                const option = document.createElement('option');
+                option.value = sub; option.textContent = sub;
+                subcatSelect.appendChild(option);
             });
-
-            if (uniqueEntryGroups.length > COMPACT_HISTORY_LIMIT) {
-                historyToggleContainer.innerHTML = `<button id="toggle-history-view" class="text-sm text-blue-600 hover:underline">${isHistoryExpanded ? 'Recolher' : 'Mostrar todo o histórico'}</button>`;
-            } else {
-                historyToggleContainer.innerHTML = '';
+            if(subcatSelect.querySelector(`option[value="${previousSubcat}"]`)) {
+                subcatSelect.value = previousSubcat;
             }
-        };
+        }
         
-        const switchView = (viewName) => {
-            mainView.classList.toggle('hidden', viewName !== 'main');
-            settingsView.classList.toggle('hidden', viewName !== 'settings');
-            if (viewName === 'settings') {
-                isHistoryExpanded = false;
-                updateSettingsUI();
-                displayHistory();
-            } else if (viewName === 'main') {
-                loadSettings(); // Recarrega as configurações para garantir que a UI principal reaja corretamente.
-                searchInput.focus(); // Foca o campo de busca
-            }
-        };
+        // Show/hide groups
+        form.querySelector('#call-details-group').classList.toggle('hidden', !isCallProblem || isFWA);
+        form.querySelector('#site-app-details-group').classList.toggle('hidden', subcategory !== 'Não acessa site/app específico');
+        form.querySelector('#resolution-details-group').classList.toggle('hidden', status !== 'Concluído');
 
-        const createSlug = (text) => text.toLowerCase().replace(/\s+/g, '-');
-        const createQuery = (text) => text.replace(/\s+/g, '+');
-        const luhnCalculate = (n) => (n.split('').reduce((s, d, i) => s + (i % 2 ? +d : [0, 2, 4, 6, 8, 1, 3, 5, 7, 9][d]), 0) * 9) % 10;
+        // Logic within call details
+        if(isCallProblem && !isFWA) {
+            form.querySelector('#origin-numbers-container').classList.toggle('hidden', makingCallSubcategories.includes(subcategory));
+            form.querySelector('#destination-numbers-container').classList.toggle('hidden', receivingCallSubcategories.includes(subcategory));
+        }
         
-        const copyToClipboard = (text, button) => { const textArea = document.createElement("textarea"); textArea.value = text; textArea.style.position = "fixed"; textArea.style.left = "-9999px"; document.body.appendChild(textArea); textArea.select(); try { document.execCommand('copy'); const originalContent = button.innerHTML; button.innerHTML = 'Copiado!'; button.classList.add('text-green-600'); setTimeout(() => { button.innerHTML = originalContent; button.classList.remove('text-green-600'); }, 1500); } catch (err) { console.error('Falha ao copiar:', err); } finally { document.body.removeChild(textArea); } };
+        // Logic within resolution details
+        if (status === 'Concluído') {
+            const tbaOption = form.querySelector('#resolution-type-select option[value="Tratado TBA"]');
+            tbaOption.disabled = !isCallProblem || isFWA;
+            if(tbaOption.disabled && resolutionType === 'Tratado TBA') {
+                 form.querySelector('#resolution-type-select').value = '';
+            }
+            form.querySelector('#ba-number-group').classList.toggle('hidden', form.querySelector('#resolution-type-select').value !== 'Tratado TBA');
+            form.querySelector('#returned-tn1-group').classList.toggle('hidden', form.querySelector('#resolution-type-select').value !== 'Tratado TN2');
+        }
+    }
+
+
+    async function handleCityAutocomplete(query, suggestionsId) {
+        const suggestionsContainer = document.getElementById(suggestionsId);
+        if (query.length < 3) { suggestionsContainer.classList.add('hidden'); return; }
         
-        // Modificado: A função redirectToImeiInfo agora recebe o valor digitado e o IMEI a ser usado para a busca
-        const redirectToImeiInfo = (inputValue, imeiToUse, originalImei = null) => { 
-            saveToHistory({ type: 'imei', value: inputValue, originalImei: originalImei, timestamp: new Date().toISOString() }); 
-            window.open(`https://www.imei.info/?imei=${imeiToUse}`, '_blank'); 
-        };
-
-        const redirectToDeviceSearch = (brand, model, site) => {
-            const brandSlug = createSlug(brand); const modelSlug = createSlug(model); const modelQuery = createQuery(model); let url;
-            switch(site) {
-                case 'kimovil': url = `https://www.kimovil.com/pt/onde-comprar-${brandSlug}-${modelSlug}`; break;
-                case 'maiscelular': url = `https://www.maiscelular.com.br/fichas-tecnicas/${brandSlug}/${modelSlug}/`; break;
-                case 'gsmarena': url = `https://www.gsmarena.com/res.php3?sSearch=${modelQuery}`; break;
-            }
-            if (url) { saveToHistory({ type: 'device', value: `${brand} ${model}`, site: site, timestamp: new Date().toISOString() }); window.open(url, '_blank'); }
-        };
-        const identifyBrand = (model) => { const modelLower = model.toLowerCase(); for (const brand of brandPriorityOrder) { if (modelLower.startsWith(brand.toLowerCase())) return brand; } for (const brand of brandPriorityOrder) { const keywords = brandKeywords[brand]; if (keywords.some(keyword => modelLower.includes(keyword))) return brand; } return null; };
-        
-        // Modificado: Lógica para getImeiActionDetails conforme as novas regras
-        const getImeiActionDetails = (value) => {
-            const result = { imeiToSearch: value, originalImei: null, feedbackMessage: '', feedbackIcon: '', colorClass: '', canSearch: false };
-            const isFifteenDigits = /^\d{15}$/.test(value);
-            const isFourteenDigits = /^\d{14}$/.test(value);
-            const isValidLuhn = isFifteenDigits && (Number(value[14]) === luhnCalculate(value.substring(0, 14)));
-
-            result.canSearch = true; // Permite a busca mesmo se o IMEI for inválido/incompleto
-
-            if (settings.suggestImeiCorrection) {
-                if (isFourteenDigits) {
-                    result.imeiToSearch = value + luhnCalculate(value);
-                    result.originalImei = value;
-                    result.feedbackMessage = `IMEI sugerido: <strong class="font-mono">${result.imeiToSearch}</strong>`;
-                    result.colorClass = 'text-blue-600';
-                    result.feedbackIcon = infoCircleIconSVG;
-                } else if (isFifteenDigits && isValidLuhn) {
-                    result.feedbackMessage = `IMEI válido.`;
-                    result.colorClass = 'text-green-600';
-                    result.feedbackIcon = checkCircleIconSVG;
-                } else if (isFifteenDigits && !isValidLuhn) {
-                    result.imeiToSearch = value.substring(0, 14) + luhnCalculate(value.substring(0, 14));
-                    result.originalImei = value;
-                    result.feedbackMessage = `IMEI inválido. Corrigido para <strong class="font-mono">${result.imeiToSearch}</strong>`;
-                    result.colorClass = 'text-orange-600';
-                    result.feedbackIcon = warningCircleIconSVG;
-                } else {
-                    // Para qualquer outro comprimento que não 14 ou 15 dígitos
-                    result.feedbackMessage = `IMEI deve ter 14 ou 15 dígitos para sugestão.`;
-                    result.colorClass = 'text-red-600';
-                    result.feedbackIcon = warningCircleIconSVG;
-                    result.imeiToSearch = value; // Redireciona com o valor digitado
-                }
-            } else { // 'Sugerir correção de IMEI' está desativada
-                result.imeiToSearch = value; // Sempre redireciona com o valor digitado
-
-                if (isFifteenDigits && isValidLuhn) {
-                    result.feedbackMessage = `IMEI válido.`;
-                    result.colorClass = 'text-green-600';
-                    result.feedbackIcon = checkCircleIconSVG;
-                } else if (isFifteenDigits && !isValidLuhn) {
-                    result.feedbackMessage = `IMEI inválido.`;
-                    result.colorClass = 'text-red-600';
-                    result.feedbackIcon = warningCircleIconSVG;
-                } else if (isFourteenDigits) {
-                    result.feedbackMessage = `IMEI sugerido: <strong class="font-mono">${value + luhnCalculate(value)}</strong>`; // Apenas exibe, não redireciona com o sugerido
-                    result.colorClass = 'text-blue-600';
-                    result.feedbackIcon = infoCircleIconSVG;
-                }
-                else {
-                    result.feedbackMessage = `IMEI deve ter 14 ou 15 dígitos.`;
-                    result.colorClass = 'text-red-600';
-                    result.feedbackIcon = warningCircleIconSVG;
-                }
-            }
-            return result;
-        };
-        
-        // Modificado: handleSearchLogic para exibir a mensagem formatada
-        const handleSearchLogic = (value) => {
-            try {
-                selectedSuggestionIndex = -1;
-                if (/^\d*$/.test(value)) { searchInput.setAttribute('maxlength', '15'); } else { searchInput.removeAttribute('maxlength'); }
-
-                if (!value.trim()) {
-                    autocompleteContainer.classList.remove('opacity-100', 'scale-100', 'pointer-events-auto');
-                    autocompleteContainer.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
-                    searchInput.setAttribute('aria-expanded', 'false');
-                    return;
-                }
-
-                let suggestionsHTML = '';
-
-                if (/[a-zA-Z]/.test(value)) {
-                    let historySuggestions = [];
-                    if (settings.showPastSearches) {
-                        historySuggestions = getHistory().filter(entry => entry.type === 'device' && entry.value.toLowerCase().includes(value.toLowerCase())).map(entry => {
-                            const [brand, ...modelParts] = entry.value.split(' ');
-                            return { brand, model: modelParts.join(' '), isHistory: true, site: entry.site };
-                        });
-                    }
-
-                    const typedBrand = identifyBrand(value);
-                    const inferredBrand = typedBrand || 'Dispositivo';
-                    let modelOnly = value;
-                    if (typedBrand && value.toLowerCase().startsWith(typedBrand.toLowerCase())) {
-                        modelOnly = value.substring(typedBrand.length).trim();
-                    }
-                    const genericSuggestion = { brand: inferredBrand, model: modelOnly, isHistory: false, site: null };
-                    if (typedBrand) {
-                        historySuggestions = historySuggestions.filter(sugg => sugg.brand === typedBrand);
-                    }
-                    const allSuggestions = [...new Map([...historySuggestions, genericSuggestion].map(item => [(item.brand + " " + item.model).toLowerCase(), item])).values()];
-
-                    if (allSuggestions.length > 0) {
-                        const enabledSites = settings.searchSources.filter(s => s.enabled).map(s => s.id);
-                        allSuggestions.forEach(device => {
-                            const modelName = device.model.trim();
-                            if (!modelName) return;
-                            const fullName = device.brand.toLowerCase() === 'dispositivo' || modelName.toLowerCase().startsWith(device.brand.toLowerCase()) ? modelName : `${device.brand} ${modelName}`;
-                            enabledSites.forEach(site => { // Iterar sobre todos os sites habilitados
-                                const icon = device.isHistory ? historyIconSVG : searchIconSVG;
-                                suggestionsHTML += `<div class="suggestion-item p-3 px-4 flex items-center cursor-pointer border-b border-zinc-100 last:border-b-0 hover:bg-blue-50 transition-colors duration-150" data-brand="${device.brand}" data-model="${modelName}" data-site="${site.toLowerCase()}">${icon}<span>Buscar <strong>${fullName}</strong> em <em>${ALL_SITES[site]}</em></span></div>`;
-                            });
-                        });
-                    }
-                } else if (/^\d*$/.test(value)) { // Se for IMEI
-                    const imeiDetails = getImeiActionDetails(value);
-                    suggestionsHTML = `
-                        <div class="flex flex-col items-center justify-center p-4 text-sm">
-                            <div class="flex items-center text-center ${imeiDetails.colorClass} mb-2">
-                                ${imeiDetails.feedbackIcon}
-                                <span class="ml-2">${imeiDetails.feedbackMessage}</span>
-                                ${imeiDetails.imeiToSearch !== value ? `<button class="copy-feedback-btn ml-2 p-1 text-zinc-400 hover:text-blue-600" data-text="${imeiDetails.imeiToSearch}" title="Copiar">${copyIconSVG}</button>` : ''}
-                            </div>
-                            <div class="text-xs text-zinc-500 text-center">Pressione Enter para consultar</div>
-                        </div>`;
-                }
-
-                if(suggestionsHTML){
-                    autocompleteContainer.innerHTML = suggestionsHTML;
-                    autocompleteContainer.classList.add('opacity-100', 'scale-100', 'pointer-events-auto');
-                    autocompleteContainer.classList.remove('opacity-0', 'scale-95', 'pointer-events-none');
-                    searchInput.setAttribute('aria-expanded', 'true');
-                } else {
-                     autocompleteContainer.classList.remove('opacity-100', 'scale-100', 'pointer-events-auto');
-                    autocompleteContainer.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
-                    searchInput.setAttribute('aria-expanded', 'false');
-                }
-
-            } catch (error) {
-                console.error("Erro na busca:", error);
-                autocompleteContainer.innerHTML = `<div class="p-4 text-center text-sm text-red-600">Ocorreu um erro. Tente novamente.</div>`;
-                autocompleteContainer.classList.add('opacity-100', 'scale-100', 'pointer-events-auto');
-                autocompleteContainer.classList.remove('opacity-0', 'scale-95', 'pointer-events-none');
-            }
-        };
-        const debouncedSearch = debounce(handleSearchLogic, DEBOUNCE_DELAY);
-
-        // --- MANIPULADORES DE EVENTOS ---
-        const handleKeydown = (e) => {
-            const isAutocompleteVisible = !autocompleteContainer.classList.contains('opacity-0');
-
-            if (isAutocompleteVisible && autocompleteContainer.querySelector('.suggestion-item')) {
-                const suggestions = autocompleteContainer.querySelectorAll('.suggestion-item');
-                if (e.key === 'ArrowDown') { e.preventDefault(); if(selectedSuggestionIndex < suggestions.length -1) { selectedSuggestionIndex++; suggestions.forEach(s => s.classList.remove('selected')); suggestions[selectedSuggestionIndex].classList.add('selected'); } }
-                else if (e.key === 'ArrowUp') { e.preventDefault(); if(selectedSuggestionIndex > 0) { selectedSuggestionIndex--; suggestions.forEach(s => s.classList.remove('selected')); suggestions[selectedSuggestionIndex].classList.add('selected'); } }
-            }
-
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                if (settings.enterAction === 'none') return;
-
-                const value = searchInput.value.trim();
-                const imeiDetails = getImeiActionDetails(value);
-
-                // Lógica de redirecionamento de IMEI
-                if (/^\d*$/.test(value)) { // Se o valor for numérico (potencialmente um IMEI)
-                    if (settings.suggestImeiCorrection) {
-                        // Se a correção está ativada, use o IMEI corrigido/sugerido para a busca
-                        redirectToImeiInfo(value, imeiDetails.imeiToSearch, imeiDetails.originalImei);
-                    } else {
-                        // Se a correção está desativada, use o valor exato digitado para a busca
-                        redirectToImeiInfo(value, value);
-                    }
-                    return; 
-                }
-
-                if (selectedSuggestionIndex > -1) {
-                    const selected = autocompleteContainer.querySelector('.suggestion-item.selected');
-                    if (selected) { selected.click(); return; }
-                }
-
-                if (settings.enterAction === 'first' && autocompleteContainer.querySelector('.suggestion-item')) {
-                    autocompleteContainer.querySelector('.suggestion-item').click();
-                    return;
-                }
-                
-                if (settings.enterAction === 'smart' && value && !/^\d+$/.test(value)) {
-                    const brand = identifyBrand(value) || 'Dispositivo';
-                    const defaultSite = (settings.searchSources.find(s => s.enabled) || {id: 'gsmarena'}).id;
-                    redirectToDeviceSearch(brand, value, defaultSite);
-                }
-            }
-        };
-        const handleAutocompleteClick = (e) => {
-            const suggestionItem = e.target.closest('.suggestion-item'); 
-            if (suggestionItem) { 
-                const { brand, model, site } = suggestionItem.dataset; 
-                
-                // Se a sugestão possui um atributo 'site', significa que é um link direto para um site específico.
-                if (site) {
-                    redirectToDeviceSearch(brand, model, site); 
-                    // Após o redirecionamento, esconda o contêiner de sugestões e atualize o atributo aria-expanded.
-                    autocompleteContainer.classList.remove('opacity-100', 'scale-100', 'pointer-events-auto');
-                    autocompleteContainer.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
-                    searchInput.setAttribute('aria-expanded', 'false');
-                    searchInput.value = `${brand} ${model}`; // Mantenha o nome do aparelho no input para contexto
-                } else {
-                    // Esta parte do código seria para sugestões não específicas de sites (ex: informações de IMEI).
-                    // No fluxo atual, as sugestões de aparelhos SEMPRE virão com um 'site' definido.
-                    // Portanto, essa condição 'else' será acionada principalmente por interações relacionadas ao IMEI.
-                    // A lógica para "persister a amostragem de sites" é tratada pela handleSearchLogic
-                    // que já gera múltiplos suggestion-items com diferentes sites.
-                }
-            }
-            const copyBtn = e.target.closest('.copy-feedback-btn'); 
-            if(copyBtn) { 
-                copyToClipboard(copyBtn.dataset.text, copyBtn); 
-            }
-        };
-        const handleMenuClick = (e) => {
-            e.preventDefault(); 
-            const inactiveClasses = ['text-zinc-600', 'hover:bg-zinc-100']; 
-            const activeClasses = ['bg-blue-50', 'font-semibold', 'text-blue-700'];
-            menuItems.forEach(i => { i.classList.remove(...activeClasses); i.classList.add(...inactiveClasses); }); 
-            e.currentTarget.classList.remove(...inactiveClasses); 
-            e.currentTarget.classList.add(...activeClasses); 
-            switchView(e.currentTarget.dataset.view);
-
-            // Adicionado: Foca o campo de busca quando a visualização principal é selecionada
-            if (e.currentTarget.dataset.view === 'main') {
-                searchInput.focus();
-            }
-        };
-        
-        const handleSettingsChange = (e) => {
-            const { name, type, value, checked, id } = e.target;
-            let settingKey;
-
-            if (name === 'enter-action') settingKey = 'enterAction';
-            else if (name === 'date-format') settingKey = 'dateFormat';
-            else if (id === 'setting-suggest-imei') settingKey = 'suggestImeiCorrection';
-            else if (id === 'setting-save-history') settingKey = 'saveHistory';
-            else if (id === 'setting-show-past') settingKey = 'showPastSearches';
-            else if (id === 'setting-secure-delete') settingKey = 'secureHistoryDeletion';
-            else if (name.startsWith('source-')) {
-                const sourceId = name.split('-')[1];
-                const source = settings.searchSources.find(s => s.id === sourceId);
-                if (source) source.enabled = checked;
-                saveSettings(settings);
-                return;
-            }
-
-            if (settingKey) {
-                settings[settingKey] = (type === 'checkbox') ? checked : value;
-            }
-            
-            saveSettings(settings);
-            if (name === 'date-format') {
-                displayHistory();
-            }
-        };
-
-        // --- GESTÃO DE AJUSTES ---
-        const saveSettings = (newSettings) => localStorage.setItem('unifiedSettings', JSON.stringify(newSettings));
-        const loadSettings = () => {
-            const defaults = { enterAction: 'smart', suggestImeiCorrection: true, searchSources: Object.keys(ALL_SITES).map(id => ({id, enabled: true})), saveHistory: true, showPastSearches: true, dateFormat: 'absolute', secureHistoryDeletion: true };
-            const stored = JSON.parse(localStorage.getItem('unifiedSettings'));
-            settings = { ...defaults, ...stored };
-            if (!stored || !stored.searchSources) {
-                settings.searchSources = defaults.searchSources;
-            } else {
-                 settings.searchSources = Object.keys(ALL_SITES).map(id => {
-                    const storedSource = stored.searchSources.find(s => s.id === id);
-                    return { id, enabled: storedSource ? storedSource.enabled : true };
-                });
-            }
-        };
-        const updateSettingsUI = () => {
-            settingsElements.enterAction.forEach(radio => radio.checked = radio.value === settings.enterAction);
-            settingsElements.suggestImeiCorrection.checked = settings.suggestImeiCorrection;
-            settings.searchSources.forEach(source => { const chk = document.getElementById(`source-${source.id}`); if (chk) chk.checked = source.enabled; });
-            settingsElements.saveHistory.checked = settings.saveHistory;
-            settingsElements.showPastSearches.checked = settings.showPastSearches;
-            settingsElements.dateFormat.forEach(radio => radio.checked = radio.value === settings.dateFormat);
-            settingsElements.secureHistoryDeletion.checked = settings.secureHistoryDeletion;
-        };
-        const buildSearchSourcesUI = () => {
-            let html = '';
-            settings.searchSources.forEach(source => {
-                html += `<div class="flex items-center"><input id="source-${source.id}" name="source-${source.id}" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"><label for="source-${source.id}" class="ml-3 text-sm text-zinc-600">${ALL_SITES[source.id]}</label></div>`;
-            });
-            settingsElements.searchSources.innerHTML = html;
-        };
-        
-        // --- INICIALIZAÇÃO DA APLICAÇÃO ---
-        function initializeEventListeners() {
-            searchInput.addEventListener('input', () => debouncedSearch(searchInput.value));
-            searchInput.addEventListener('focus', () => handleSearchLogic(searchInput.value));
-            searchInput.addEventListener('keydown', handleKeydown);
-            autocompleteContainer.addEventListener('click', handleAutocompleteClick);
-            document.addEventListener('click', e => { 
-                if (!searchContainer.contains(e.target)) {
-                    autocompleteContainer.classList.remove('opacity-100', 'scale-100', 'pointer-events-auto');
-                    autocompleteContainer.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
-                    searchInput.setAttribute('aria-expanded', 'false');
-                }
-            });
-            
-            clearHistoryBtn.addEventListener('click', () => { 
-                if (settings.secureHistoryDeletion) {
-                    modal.container.classList.remove('hidden');
-                } else {
-                    localStorage.removeItem('unifiedHistory');
-                    displayHistory(); 
-                }
-            });
-            modal.cancelBtn.addEventListener('click', () => modal.container.classList.add('hidden'));
-            modal.confirmBtn.addEventListener('click', () => {
-                 localStorage.removeItem('unifiedHistory');
-                 displayHistory(); 
-                 modal.container.classList.add('hidden');
-            });
-
-            historyList.addEventListener('click', (e) => {
-                const container = e.target.closest('.history-item-container');
-                const expandBtn = e.target.closest('.expand-duplicates-btn');
-                if (expandBtn) {
-                    e.preventDefault();
-                    const targetId = expandBtn.dataset.target;
-                    const targetElement = document.getElementById(targetId);
-                    if (targetElement) {
-                        const isHidden = targetElement.classList.toggle('hidden');
-                        expandBtn.textContent = isHidden ? `Ver ${expandBtn.dataset.count} mais` : 'Recolher';
-                    }
-                    return;
-                }
-
-                const mainAction = e.target.closest('.history-main-action');
-                if(mainAction){
-                    if(container) {
-                        container.classList.add('bg-blue-100');
-                        setTimeout(() => container.classList.remove('bg-blue-100'), 200);
-                    }
-                    setTimeout(() => {
-                        const { type, value, site, originalImei } = mainAction.dataset; 
-                        if (type === 'imei') { 
-                            // Ao clicar no histórico, se for IMEI, sempre usa o valor do histórico para a busca,
-                            // mas a correção visual na sugestão já foi aplicada ao histórico salvo.
-                            // Para consistência, passamos o 'value' do histórico como imeiToUse.
-                            redirectToImeiInfo(value, value, originalImei || null); 
-                        } 
-                        else if (type === 'device') { 
-                            const [brand, ...modelParts] = value.split(' '); 
-                            const model = modelParts.join(' '); 
-                            redirectToDeviceSearch(brand, model, site); 
+        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&countrycodes=br&format=json&limit=5&addressdetails=1`;
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            suggestionsContainer.innerHTML = '';
+            if (data.length > 0) {
+                data.forEach(place => {
+                    const placeName = place.display_name;
+                    const suggestionDiv = document.createElement('div');
+                    suggestionDiv.className = 'p-2 hover:bg-gray-700 cursor-pointer';
+                    suggestionDiv.textContent = placeName;
+                    suggestionDiv.addEventListener('click', () => {
+                        const inputTargetId = suggestionsId === 'city-suggestions' ? 'city-input' : 'search-input';
+                        document.getElementById(inputTargetId).value = placeName;
+                        suggestionsContainer.classList.add('hidden');
+                        if (inputTargetId === 'search-input') {
+                             handleSearch(new Event('submit'), placeName);
                         }
-                    }, 100);
-                    return;
-                }
+                    });
+                    suggestionsContainer.appendChild(suggestionDiv);
+                });
+                suggestionsContainer.classList.remove('hidden');
+            } else { suggestionsContainer.classList.add('hidden'); }
+        } catch (error) { console.error("City autocomplete error:", error); }
+    }
 
-                const deleteBtn = e.target.closest('.delete-history-btn');
-                if (deleteBtn) {
-                    const valueToDelete = e.target.closest('.history-item').dataset.value;
-                    let history = getHistory().filter(item => item.value !== valueToDelete);
-                    localStorage.setItem('unifiedHistory', JSON.stringify(history));
-                    displayHistory();
-                    return;
-                }
-
-                const copyBtn = e.target.closest('.copy-history-btn');
-                if (copyBtn) {
-                    const valueToCopy = e.target.closest('.history-item').dataset.value;
-                    copyToClipboard(valueToCopy, copyBtn);
-                    return;
-                }
-            });
-
-            historyToggleContainer.addEventListener('click', (e) => {
-                if(e.target.id === 'toggle-history-view') {
-                    isHistoryExpanded = !isHistoryExpanded;
-                    displayHistory();
-                }
-            });
-
-            menuItems.forEach(item => item.addEventListener('click', handleMenuClick));
-            settingsView.addEventListener('change', handleSettingsChange);
+    async function handleAddTicket(e) {
+        e.preventDefault();
+        const submitBtn = document.getElementById('submit-ticket-btn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Buscando Localização...';
+        const formData = new FormData(e.target);
+        const city = formData.get('city');
+        const coords = await getCoordsForCity(city);
+        if (!coords) {
+            alert('Cidade não encontrada. Selecione uma da lista ou verifique o nome e tente novamente.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Criar Chamado';
+            return;
         }
-        
-        function initializeApp() {
-            loadSettings();
-            buildSearchSourcesUI();
-            initializeEventListeners();
-            document.querySelector('.menu-item[data-view="main"]').click();
-        }
+        const getMultiInputValues = (name) => Array.from(document.querySelectorAll(`input[name=${name}]`)).map(input => input.value).filter(Boolean);
+        const newTicket = {
+            id: formData.get('id'), line: formData.get('line'), city: city, coords: coords,
+            supportType: formData.get('supportType'), category: formData.get('category'), subcategory: formData.get('subcategory'),
+            status: formData.get('status'),
+            resolutionType: formData.get('status') === 'Concluído' ? formData.get('resolutionType') : null,
+            returnedToTN1: formData.get('status') === 'Concluído' && formData.get('resolutionType') === 'Tratado TN2' ? formData.get('returnedToTN1') === 'on' : false,
+            ba: formData.get('status') === 'Concluído' && formData.get('resolutionType') === 'Tratado TBA' ? formData.get('ba') : null,
+            origins: getMultiInputValues('origins'), destinations: getMultiInputValues('destinations'),
+            appDetails: formData.get('subcategory') === 'Não acessa site/app específico' ? { name: formData.get('appName'), link: formData.get('appLink') } : null,
+            observation: formData.get('observation') || null
+        };
+        tickets.unshift(newTicket);
+        renderTickets('all');
+        renderAnalytics();
+        updateTicketMarkers();
+        e.target.reset();
+        document.getElementById('add-ticket-modal').classList.add('hidden');
+        ['#resolution-details-group', '#ba-number-group', '#returned-tn1-group', '#call-details-group', '#site-app-details-group'].forEach(sel => document.querySelector(sel).classList.add('hidden'));
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Criar Chamado';
+    }
 
-        document.addEventListener('DOMContentLoaded', initializeApp);
+    async function handleSearch(e, query) {
+        e.preventDefault();
+        const coords = await getCoordsForCity(query);
+        if (coords) map.flyTo(coords, 12); else alert("Localização não encontrada. Por favor, verifique o nome da cidade.");
+    }
     </script>
 </body>
 </html>
