@@ -342,6 +342,7 @@
                 displayHistory();
             } else if (viewName === 'main') {
                 loadSettings(); // Recarrega as configurações para garantir que a UI principal reaja corretamente.
+                searchInput.focus(); // Foca o campo de busca
             }
         };
 
@@ -350,7 +351,13 @@
         const luhnCalculate = (n) => (n.split('').reduce((s, d, i) => s + (i % 2 ? +d : [0, 2, 4, 6, 8, 1, 3, 5, 7, 9][d]), 0) * 9) % 10;
         
         const copyToClipboard = (text, button) => { const textArea = document.createElement("textarea"); textArea.value = text; textArea.style.position = "fixed"; textArea.style.left = "-9999px"; document.body.appendChild(textArea); textArea.select(); try { document.execCommand('copy'); const originalContent = button.innerHTML; button.innerHTML = 'Copiado!'; button.classList.add('text-green-600'); setTimeout(() => { button.innerHTML = originalContent; button.classList.remove('text-green-600'); }, 1500); } catch (err) { console.error('Falha ao copiar:', err); } finally { document.body.removeChild(textArea); } };
-        const redirectToImeiInfo = (imei, originalImei = null) => { saveToHistory({ type: 'imei', value: imei, originalImei: originalImei, timestamp: new Date().toISOString() }); window.open(`https://www.imei.info/?imei=${imei}`, '_blank'); };
+        
+        // Modificado: A função redirectToImeiInfo agora recebe o valor digitado e o IMEI a ser usado para a busca
+        const redirectToImeiInfo = (inputValue, imeiToUse, originalImei = null) => { 
+            saveToHistory({ type: 'imei', value: inputValue, originalImei: originalImei, timestamp: new Date().toISOString() }); 
+            window.open(`https://www.imei.info/?imei=${imeiToUse}`, '_blank'); 
+        };
+
         const redirectToDeviceSearch = (brand, model, site) => {
             const brandSlug = createSlug(brand); const modelSlug = createSlug(model); const modelQuery = createQuery(model); let url;
             switch(site) {
@@ -362,43 +369,57 @@
         };
         const identifyBrand = (model) => { const modelLower = model.toLowerCase(); for (const brand of brandPriorityOrder) { if (modelLower.startsWith(brand.toLowerCase())) return brand; } for (const brand of brandPriorityOrder) { const keywords = brandKeywords[brand]; if (keywords.some(keyword => modelLower.includes(keyword))) return brand; } return null; };
         
+        // Modificado: Lógica para getImeiActionDetails conforme as novas regras
         const getImeiActionDetails = (value) => {
             const result = { imeiToSearch: value, originalImei: null, feedbackMessage: '', feedbackIcon: '', colorClass: '', canSearch: false };
-            if (!/^\d{14,15}$/.test(value)) return result;
+            const isFifteenDigits = /^\d{15}$/.test(value);
+            const isFourteenDigits = /^\d{14}$/.test(value);
+            const isValidLuhn = isFifteenDigits && (Number(value[14]) === luhnCalculate(value.substring(0, 14)));
 
-            const isValid = value.length === 15 && (Number(value[14]) === luhnCalculate(value.substring(0, 14)));
+            result.canSearch = true; // Permite a busca mesmo se o IMEI for inválido/incompleto
 
             if (settings.suggestImeiCorrection) {
-                result.canSearch = true;
-                if (value.length === 14) {
+                if (isFourteenDigits) {
                     result.imeiToSearch = value + luhnCalculate(value);
                     result.originalImei = value;
                     result.feedbackMessage = `IMEI sugerido: <strong class="font-mono">${result.imeiToSearch}</strong>`;
                     result.colorClass = 'text-blue-600';
                     result.feedbackIcon = infoCircleIconSVG;
-                } else if (isValid) {
+                } else if (isFifteenDigits && isValidLuhn) {
                     result.feedbackMessage = `IMEI válido.`;
                     result.colorClass = 'text-green-600';
                     result.feedbackIcon = checkCircleIconSVG;
-                } else {
+                } else if (isFifteenDigits && !isValidLuhn) {
                     result.imeiToSearch = value.substring(0, 14) + luhnCalculate(value.substring(0, 14));
                     result.originalImei = value;
                     result.feedbackMessage = `IMEI inválido. Corrigido para <strong class="font-mono">${result.imeiToSearch}</strong>`;
                     result.colorClass = 'text-orange-600';
                     result.feedbackIcon = warningCircleIconSVG;
-                }
-            } else {
-                if (value.length !== 15) {
-                    result.feedbackMessage = `IMEI deve ter 15 dígitos.`;
+                } else {
+                    // Para qualquer outro comprimento que não 14 ou 15 dígitos
+                    result.feedbackMessage = `IMEI deve ter 14 ou 15 dígitos para sugestão.`;
                     result.colorClass = 'text-red-600';
                     result.feedbackIcon = warningCircleIconSVG;
-                } else if (isValid) {
+                    result.imeiToSearch = value; // Redireciona com o valor digitado
+                }
+            } else { // 'Sugerir correção de IMEI' está desativada
+                result.imeiToSearch = value; // Sempre redireciona com o valor digitado
+
+                if (isFifteenDigits && isValidLuhn) {
                     result.feedbackMessage = `IMEI válido.`;
                     result.colorClass = 'text-green-600';
                     result.feedbackIcon = checkCircleIconSVG;
-                    result.canSearch = true;
-                } else {
+                } else if (isFifteenDigits && !isValidLuhn) {
                     result.feedbackMessage = `IMEI inválido.`;
+                    result.colorClass = 'text-red-600';
+                    result.feedbackIcon = warningCircleIconSVG;
+                } else if (isFourteenDigits) {
+                    result.feedbackMessage = `IMEI sugerido: <strong class="font-mono">${value + luhnCalculate(value)}</strong>`; // Apenas exibe, não redireciona com o sugerido
+                    result.colorClass = 'text-blue-600';
+                    result.feedbackIcon = infoCircleIconSVG;
+                }
+                else {
+                    result.feedbackMessage = `IMEI deve ter 14 ou 15 dígitos.`;
                     result.colorClass = 'text-red-600';
                     result.feedbackIcon = warningCircleIconSVG;
                 }
@@ -406,6 +427,7 @@
             return result;
         };
         
+        // Modificado: handleSearchLogic para exibir a mensagem formatada
         const handleSearchLogic = (value) => {
             try {
                 selectedSuggestionIndex = -1;
@@ -447,15 +469,23 @@
                             const modelName = device.model.trim();
                             if (!modelName) return;
                             const fullName = device.brand.toLowerCase() === 'dispositivo' || modelName.toLowerCase().startsWith(device.brand.toLowerCase()) ? modelName : `${device.brand} ${modelName}`;
-                            const icon = device.isHistory ? historyIconSVG : searchIconSVG;
-                            enabledSites.forEach(site => {
+                            enabledSites.forEach(site => { // Iterar sobre todos os sites habilitados
+                                const icon = device.isHistory ? historyIconSVG : searchIconSVG;
                                 suggestionsHTML += `<div class="suggestion-item p-3 px-4 flex items-center cursor-pointer border-b border-zinc-100 last:border-b-0 hover:bg-blue-50 transition-colors duration-150" data-brand="${device.brand}" data-model="${modelName}" data-site="${site.toLowerCase()}">${icon}<span>Buscar <strong>${fullName}</strong> em <em>${ALL_SITES[site]}</em></span></div>`;
                             });
                         });
                     }
-                } else if (/^\d{14,15}$/.test(value)) {
+                } else if (/^\d*$/.test(value)) { // Se for IMEI
                     const imeiDetails = getImeiActionDetails(value);
-                    suggestionsHTML = `<div class="p-4 text-sm ${imeiDetails.colorClass} flex items-center justify-center">${imeiDetails.feedbackIcon}<span class="ml-2">${imeiDetails.feedbackMessage}</span><button class="copy-feedback-btn ml-2 p-1 text-zinc-400 hover:text-blue-600" data-text="${imeiDetails.imeiToSearch}" title="Copiar">${copyIconSVG}</button></div><div class="text-xs text-zinc-500 text-center pb-2">Pressione Enter para consultar</div>`;
+                    suggestionsHTML = `
+                        <div class="flex flex-col items-center justify-center p-4 text-sm">
+                            <div class="flex items-center text-center ${imeiDetails.colorClass} mb-2">
+                                ${imeiDetails.feedbackIcon}
+                                <span class="ml-2">${imeiDetails.feedbackMessage}</span>
+                                ${imeiDetails.imeiToSearch !== value ? `<button class="copy-feedback-btn ml-2 p-1 text-zinc-400 hover:text-blue-600" data-text="${imeiDetails.imeiToSearch}" title="Copiar">${copyIconSVG}</button>` : ''}
+                            </div>
+                            <div class="text-xs text-zinc-500 text-center">Pressione Enter para consultar</div>
+                        </div>`;
                 }
 
                 if(suggestionsHTML){
@@ -495,8 +525,15 @@
                 const value = searchInput.value.trim();
                 const imeiDetails = getImeiActionDetails(value);
 
-                if (imeiDetails.canSearch) {
-                    redirectToImeiInfo(imeiDetails.imeiToSearch, imeiDetails.originalImei);
+                // Lógica de redirecionamento de IMEI
+                if (/^\d*$/.test(value)) { // Se o valor for numérico (potencialmente um IMEI)
+                    if (settings.suggestImeiCorrection) {
+                        // Se a correção está ativada, use o IMEI corrigido/sugerido para a busca
+                        redirectToImeiInfo(value, imeiDetails.imeiToSearch, imeiDetails.originalImei);
+                    } else {
+                        // Se a correção está desativada, use o valor exato digitado para a busca
+                        redirectToImeiInfo(value, value);
+                    }
                     return; 
                 }
 
@@ -518,8 +555,30 @@
             }
         };
         const handleAutocompleteClick = (e) => {
-            const suggestionItem = e.target.closest('.suggestion-item'); if (suggestionItem) { const { brand, model, site } = suggestionItem.dataset; redirectToDeviceSearch(brand, model, site); autocompleteContainer.style.display = 'none'; searchInput.value = `${brand} ${model}`; }
-            const copyBtn = e.target.closest('.copy-feedback-btn'); if(copyBtn) { copyToClipboard(copyBtn.dataset.text, copyBtn); }
+            const suggestionItem = e.target.closest('.suggestion-item'); 
+            if (suggestionItem) { 
+                const { brand, model, site } = suggestionItem.dataset; 
+                
+                // Se a sugestão possui um atributo 'site', significa que é um link direto para um site específico.
+                if (site) {
+                    redirectToDeviceSearch(brand, model, site); 
+                    // Após o redirecionamento, esconda o contêiner de sugestões e atualize o atributo aria-expanded.
+                    autocompleteContainer.classList.remove('opacity-100', 'scale-100', 'pointer-events-auto');
+                    autocompleteContainer.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
+                    searchInput.setAttribute('aria-expanded', 'false');
+                    searchInput.value = `${brand} ${model}`; // Mantenha o nome do aparelho no input para contexto
+                } else {
+                    // Esta parte do código seria para sugestões não específicas de sites (ex: informações de IMEI).
+                    // No fluxo atual, as sugestões de aparelhos SEMPRE virão com um 'site' definido.
+                    // Portanto, essa condição 'else' será acionada principalmente por interações relacionadas ao IMEI.
+                    // A lógica para "persister a amostragem de sites" é tratada pela handleSearchLogic
+                    // que já gera múltiplos suggestion-items com diferentes sites.
+                }
+            }
+            const copyBtn = e.target.closest('.copy-feedback-btn'); 
+            if(copyBtn) { 
+                copyToClipboard(copyBtn.dataset.text, copyBtn); 
+            }
         };
         const handleMenuClick = (e) => {
             e.preventDefault(); 
@@ -529,6 +588,11 @@
             e.currentTarget.classList.remove(...inactiveClasses); 
             e.currentTarget.classList.add(...activeClasses); 
             switchView(e.currentTarget.dataset.view);
+
+            // Adicionado: Foca o campo de busca quando a visualização principal é selecionada
+            if (e.currentTarget.dataset.view === 'main') {
+                searchInput.focus();
+            }
         };
         
         const handleSettingsChange = (e) => {
@@ -642,8 +706,17 @@
                     }
                     setTimeout(() => {
                         const { type, value, site, originalImei } = mainAction.dataset; 
-                        if (type === 'imei') { redirectToImeiInfo(value, originalImei || null); } 
-                        else if (type === 'device') { const [brand, ...modelParts] = value.split(' '); const model = modelParts.join(' '); redirectToDeviceSearch(brand, model, site); }
+                        if (type === 'imei') { 
+                            // Ao clicar no histórico, se for IMEI, sempre usa o valor do histórico para a busca,
+                            // mas a correção visual na sugestão já foi aplicada ao histórico salvo.
+                            // Para consistência, passamos o 'value' do histórico como imeiToUse.
+                            redirectToImeiInfo(value, value, originalImei || null); 
+                        } 
+                        else if (type === 'device') { 
+                            const [brand, ...modelParts] = value.split(' '); 
+                            const model = modelParts.join(' '); 
+                            redirectToDeviceSearch(brand, model, site); 
+                        }
                     }, 100);
                     return;
                 }
