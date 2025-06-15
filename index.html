@@ -3,546 +3,687 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BrisaTel</title>
-    
+    <title>Telefonia N2</title>
+
+  <link rel="icon" type="image/png" href="favicon-brisanet.png">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Vue.js 3 -->
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-
-    <!-- Fontes -->
+    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Favicon Link -->
-    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/moodmadu/imei-info/main/favicon-brisanet.png">
-
-    <!-- Estilos Globais -->
     <style>
         body {
-            font-family: 'Ubuntu', sans-serif;
-            background-color: #f8fafc;
-            color: #1e293b;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
-        [v-cloak] {
-            display: none;
+        input:focus { caret-color: #3b82f6; }
+        
+        /* Estilo para toggle switch */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #3b82f6;
         }
-        /* Animações de transição para os painéis */
-        .fade-enter-active,
-        .fade-leave-active {
-            transition: opacity 0.3s ease;
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #3b82f6;
         }
-        .fade-enter-from,
-        .fade-leave-to {
-            opacity: 0;
+        /* Animação para o modal */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
         }
-        .faq-answer, .note-content {
-            transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
+        .modal-fade-in {
+            animation: fadeIn 0.2s ease-out forwards;
         }
-        .faq-answer.open {
-            max-height: 500px;
-        }
-        .note-color-palette {
-            display: flex;
-            gap: 0.5rem;
-        }
-        .note-color-swatch {
-            width: 24px;
-            height: 24px;
-            border-radius: 9999px;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: border-color 0.2s;
-        }
-        .note-color-swatch.selected {
-            border-color: #f97316; /* orange-500 */
+        .duplicates-container {
+            transition: all 0.3s ease-in-out;
         }
     </style>
+
 </head>
-<body>
+<body class="bg-zinc-100 text-zinc-900">
 
-<div id="app" v-cloak>
-    <div class="flex h-screen bg-slate-50">
-        <!-- Sidebar -->
-        <sidebar 
-            :nav-items="navigationItems" 
-            :active-panel="activePanel"
-            @navigate="handleNavigation" 
-            :is-open="isSidebarOpen"
-            @close-sidebar="isSidebarOpen = false"
-        ></sidebar>
+    <!-- Cabeçalho de Navegação -->
+    <header class="sticky top-0 z-40 bg-white/70 backdrop-blur-lg border-b border-zinc-200">
+        <div class="max-w-5xl mx-auto px-4">
+            <nav class="flex items-center justify-center h-16">
+                <ul class="flex items-center space-x-2 md:space-x-4" id="nav-menu">
+                    <li><a href="#" data-view="main" class="menu-item text-sm md:text-base px-3 py-2 rounded-lg transition-colors duration-200">Busca</a></li>
+                    <li><a href="#" data-view="settings" class="menu-item text-sm md:text-base px-3 py-2 rounded-lg transition-colors duration-200">Ajustes</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
 
-        <!-- Conteúdo Principal -->
-        <div class="flex-1 flex flex-col overflow-hidden">
-            <!-- Header Mobile -->
-            <header class="flex lg:hidden items-center justify-between p-4 bg-white border-b-2 border-slate-100">
-                <button @click="isSidebarOpen = true" class="text-slate-500 focus:outline-none">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                </button>
-                <div class="flex items-center">
-                    <img src="https://raw.githubusercontent.com/moodmadu/imei-info/main/favicon-brisanet.png" alt="BrisaTel Logo" class="w-8 h-8">
-                    <span class="ml-2 text-xl font-bold text-slate-800">BrisaTel</span>
+    <!-- Visualização Principal -->
+    <main id="main-view" class="hidden max-w-3xl mx-auto p-4 sm:p-6 md:p-12">
+        <div class="text-center">
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-zinc-900">Faça sua busca agora</h1>
+            <p class="mt-4 text-base sm:text-lg text-zinc-600">Digite um IMEI ou o modelo de um aparelho.</p>
+        </div>
+        <div class="relative mt-10" id="search-container">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none z-10"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-zinc-400"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></div>
+            <input 
+                id="unified-search-input" 
+                type="text" 
+                placeholder="IMEI ou Ex: Galaxy S24 Ultra" 
+                autocomplete="off" 
+                class="relative w-full p-4 pl-12 text-base bg-zinc-200/50 border border-transparent rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-200"
+                aria-label="Campo de busca para IMEI ou modelo do dispositivo"
+                role="searchbox"
+                aria-expanded="false"
+                aria-autocomplete="list"
+            >
+            <div id="autocomplete-container" class="absolute top-full mt-2 w-full bg-white border border-zinc-200 rounded-xl shadow-lg overflow-hidden z-20 transition-all duration-200 ease-out opacity-0 scale-95 pointer-events-none">
+                <!-- As sugestões serão inseridas aqui -->
+            </div>
+        </div>
+    </main>
+    
+    <!-- Visualização de Ajustes -->
+    <section id="settings-view" class="hidden max-w-3xl mx-auto p-4 sm:p-6 md:p-12">
+        <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-center">Ajustes</h1>
+        <div class="mt-12 space-y-10">
+
+            <!-- Seção: Comportamento da Busca -->
+            <div class="space-y-6">
+                 <h2 class="text-2xl font-bold tracking-tight">Busca</h2>
+                <!-- Ação da Tecla Enter -->
+                <div>
+                    <label class="text-base font-medium text-zinc-900">Ação da tecla "Enter"</label>
+                    <p class="text-sm text-zinc-600">Escolha o que acontece ao pressionar "Enter" na barra de busca.</p>
+                    <fieldset class="mt-4">
+                        <div class="space-y-4">
+                            <div class="flex items-center"><input id="enter-smart" name="enter-action" type="radio" value="smart" class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"><label for="enter-smart" class="ml-3 block text-sm font-medium text-zinc-700">Busca Inteligente (padrão)</label></div>
+                            <div class="flex items-center"><input id="enter-first" name="enter-action" type="radio" value="first" class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"><label for="enter-first" class="ml-3 block text-sm font-medium text-zinc-700">Selecionar primeira sugestão</label></div>
+                            <div class="flex items-center"><input id="enter-none" name="enter-action" type="radio" value="none" class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"><label for="enter-none" class="ml-3 block text-sm font-medium text-zinc-700">Nenhuma ação</label></div>
+                        </div>
+                    </fieldset>
                 </div>
-                 <div class="w-6"></div> <!-- Espaçador -->
-            </header>
-
-            <!-- Painel de Conteúdo Dinâmico -->
-            <main class="flex-1 overflow-x-hidden overflow-y-auto">
-                <div class="container px-6 py-8 mx-auto">
-                    <transition name="fade" mode="out-in">
-                        <component :is="activePanelComponent" :key="activePanel" :title="activePanelTitle"></component>
-                    </transition>
+                <!-- Correção de IMEI -->
+                <div class="flex items-center justify-between"><span class="flex-grow flex flex-col"><label for="setting-suggest-imei" class="text-base font-medium text-zinc-900">Sugerir correção de IMEI</label><span class="text-sm text-zinc-600">Calcula e exibe um dígito verificador para IMEIs.</span></span><div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in"><input type="checkbox" name="setting-suggest-imei" id="setting-suggest-imei" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/><label for="setting-suggest-imei" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label></div></div>
+                <!-- Fontes de Busca -->
+                <div>
+                    <label class="text-base font-medium text-zinc-900">Fontes de busca de aparelhos</label>
+                     <p class="text-sm text-zinc-600">Ative ou desative os sites usados para buscar fichas técnicas.</p>
+                    <fieldset class="mt-4 space-y-2" id="search-sources-fieldset"></fieldset>
                 </div>
-            </main>
+            </div>
+
+            <div class="border-t border-zinc-200"></div>
+
+            <!-- Seção: Histórico -->
+            <div class="space-y-6">
+                <h2 class="text-2xl font-bold tracking-tight">Histórico</h2>
+                 <!-- Salvar Histórico -->
+                <div class="flex items-center justify-between"><span class="flex-grow flex flex-col"><label for="setting-save-history" class="text-base font-medium text-zinc-900">Salvar histórico de buscas</label><span class="text-sm text-zinc-600">Desative para impedir que novas buscas sejam salvas.</span></span><div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in"><input type="checkbox" name="setting-save-history" id="setting-save-history" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/><label for="setting-save-history" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label></div></div>
+                <!-- Mostrar Buscas Anteriores -->
+                <div class="flex items-center justify-between"><span class="flex-grow flex flex-col"><label for="setting-show-past" class="text-base font-medium text-zinc-900">Mostrar buscas anteriores nas sugestões</label><span class="text-sm text-zinc-600">Exibe seu histórico ao digitar um modelo de aparelho.</span></span><div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in"><input type="checkbox" name="setting-show-past" id="setting-show-past" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/><label for="setting-show-past" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label></div></div>
+                <!-- Formato de Data e Hora -->
+                <div>
+                    <label class="text-base font-medium text-zinc-900">Formato de Data e Hora</label>
+                    <fieldset class="mt-2">
+                        <div class="flex items-center space-x-6">
+                            <div class="flex items-center"><input id="date-relative" name="date-format" type="radio" value="relative" class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"><label for="date-relative" class="ml-2 block text-sm font-medium text-zinc-700">Relativo (ex: há 5 minutos)</label></div>
+                            <div class="flex items-center"><input id="date-absolute" name="date-format" type="radio" value="absolute" class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"><label for="date-absolute" class="ml-2 block text-sm font-medium text-zinc-700">Absoluto (ex: 15/06/2025, 15:51)</label></div>
+                        </div>
+                    </fieldset>
+                </div>
+                 <!-- Limpeza Segura do Histórico -->
+                <div class="flex items-center justify-between"><span class="flex-grow flex flex-col"><label for="setting-secure-delete" class="text-base font-medium text-zinc-900">Exigir confirmação para limpar o histórico</label><span class="text-sm text-zinc-600">Ative para evitar a exclusão acidental de todo o histórico.</span></span><div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in"><input type="checkbox" name="setting-secure-delete" id="setting-secure-delete" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/><label for="setting-secure-delete" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label></div></div>
+            </div>
+            
+             <!-- Área do Histórico -->
+            <div class="p-4 sm:p-6 bg-zinc-200/50 rounded-xl">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg sm:text-xl font-semibold">Seu Histórico</h2>
+                    <button id="clear-history-btn" class="text-sm text-blue-600 hover:underline transition-transform active:scale-95">Limpar Tudo</button>
+                </div>
+                <ul id="history-list" class="space-y-3"></ul>
+                <div id="history-toggle-container" class="mt-4 text-center"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal de Confirmação para Limpar Histórico -->
+    <div id="confirm-clear-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white modal-fade-in">
+            <div class="mt-3 text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                    <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                </div>
+                <h3 class="text-lg leading-6 font-medium text-gray-900 mt-2">Limpar Histórico</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p class="text-sm text-gray-500">
+                        Você tem certeza que deseja apagar todo o seu histórico de buscas? Esta ação não pode ser desfeita.
+                    </p>
+                </div>
+                <div class="items-center px-4 py-3">
+                    <button id="cancel-clear-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md w-full sm:w-auto hover:bg-gray-300 mb-2 sm:mb-0 sm:mr-2">Cancelar</button>
+                    <button id="confirm-clear-action-btn" class="px-4 py-2 bg-red-600 text-white rounded-md w-full sm:w-auto hover:bg-red-700">Sim, Limpar Tudo</button>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
-<script type="module">
-    const { createApp, ref, computed, onMounted, watch } = Vue;
+    <script>
+        // --- CONSTANTES E CONFIGURAÇÕES ---
+        const HISTORY_LIMIT = 25;
+        const COMPACT_HISTORY_LIMIT = 5;
+        const DEBOUNCE_DELAY = 300;
+        const ALL_SITES = { kimovil: 'Kimovil', maiscelular: 'MaisCelular', gsmarena: 'GSMArena' };
 
-    //  COMPONENTES =================================================================
-    //  Cada funcionalidade foi separada em seu próprio componente.
+        // --- SELETORES DE ELEMENTOS ---
+        const mainView = document.getElementById('main-view');
+        const settingsView = document.getElementById('settings-view');
+        const searchInput = document.getElementById('unified-search-input');
+        const autocompleteContainer = document.getElementById('autocomplete-container');
+        const searchContainer = document.getElementById('search-container');
+        const menuItems = document.querySelectorAll('.menu-item');
+        const historyList = document.getElementById('history-list');
+        const historyToggleContainer = document.getElementById('history-toggle-container');
+        const clearHistoryBtn = document.getElementById('clear-history-btn');
+        const settingsElements = {
+            enterAction: document.querySelectorAll('input[name="enter-action"]'),
+            suggestImeiCorrection: document.getElementById('setting-suggest-imei'),
+            searchSources: document.getElementById('search-sources-fieldset'),
+            saveHistory: document.getElementById('setting-save-history'),
+            showPastSearches: document.getElementById('setting-show-past'),
+            dateFormat: document.querySelectorAll('input[name="date-format"]'),
+            secureHistoryDeletion: document.getElementById('setting-secure-delete'),
+        };
+        const modal = {
+            container: document.getElementById('confirm-clear-modal'),
+            cancelBtn: document.getElementById('cancel-clear-btn'),
+            confirmBtn: document.getElementById('confirm-clear-action-btn'),
+        };
+        
+        // --- ESTADO DA APLICAÇÃO ---
+        let selectedSuggestionIndex = -1;
+        let isHistoryExpanded = false;
+        let settings = {};
 
-    // --- Componente: Ícone SVG ---
-    const SvgIcon = {
-        props: ['path'],
-        template: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="path"></path></svg>`
-    };
+        // --- ÍCONES SVG ---
+        const searchIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search text-zinc-400 mr-3 shrink-0" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/></svg>`;
+        const historyIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-history text-zinc-400 mr-3 shrink-0" viewBox="0 0 16 16"><path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022l-.074.997zM5.56 1.838a6.99 6.99 0 0 0-1.225.434l.485.875a6 6 0 0 1 1.037-.375l-.297-.934zM8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0"/></svg>`;
+        const copyIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5-.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/></svg>`;
+        const deleteIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/></svg>`;
+        const checkCircleIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/></svg>`;
+        const warningCircleIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle-fill" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4m.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2"/></svg>`;
+        const infoCircleIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill" viewBox="0 0 16 16"><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2"/></svg>`;
 
-    // --- Componente: Sidebar ---
-    const Sidebar = {
-        props: ['navItems', 'activePanel', 'isOpen'],
-        emits: ['navigate', 'closeSidebar'],
-        components: { SvgIcon },
-        template: `
-            <div v-if="isOpen" @click="$emit('closeSidebar')" class="fixed inset-0 bg-black opacity-50 z-20 lg:hidden"></div>
-            <aside :class="['fixed inset-y-0 left-0 z-30 flex flex-col w-64 overflow-y-auto transition-transform duration-300 transform', isOpen ? 'translate-x-0' : '-translate-x-full', 'lg:translate-x-0 lg:static lg:inset-0']" class="bg-slate-800">
-                <div class="flex items-center justify-center flex-shrink-0 mt-8">
-                    <div class="flex items-center">
-                        <img src="https://raw.githubusercontent.com/moodmadu/imei-info/main/favicon-brisanet.png" alt="BrisaTel Logo" class="w-10 h-10">
-                        <span class="ml-3 text-2xl font-bold text-white">BrisaTel</span>
-                    </div>
-                </div>
-                <nav class="mt-10 flex-1 px-4">
-                    <div v-for="section in navItems" :key="section.title">
-                        <span class="px-2 py-2 mt-4 text-xs font-bold tracking-wider text-slate-500 uppercase">{{ section.title }}</span>
-                        <a v-for="item in section.items" :key="item.id" href="#" @click.prevent="$emit('navigate', item.id)" :class="['flex items-center px-4 py-3 mt-2 rounded-lg transition-colors duration-200', activePanel === item.id ? 'bg-orange-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-700 hover:text-white']">
-                            <svg-icon :path="item.iconPath" />
-                            <span class="mx-4 font-medium">{{ item.name }}</span>
-                        </a>
-                    </div>
-                </nav>
-            </aside>
-        `
-    };
-    
-    // --- Componente: Card Principal (Wrapper) ---
-    const MainCard = {
-        props: ['title', 'subtitle'],
-        template: `
-            <div>
-                <h3 class="text-3xl font-bold text-slate-800">{{ title }}</h3>
-                <p v-if="subtitle" class="text-slate-500 mt-2 mb-4">{{ subtitle }}</p>
-                <div class="mt-6 p-6 lg:p-8 bg-white rounded-xl shadow-sm border border-slate-200">
-                    <slot></slot>
-                </div>
-            </div>
-        `
-    };
+        // --- BASE DE DADOS DE PALAVRAS-CHAVE ---
+        const brandKeywords = { 'Xiaomi': ['redmi', 'poco', 'mi'], 'Samsung': ['galaxy', 'note'], 'Apple': ['iphone'], 'Motorola': ['moto', 'edge', 'razr'], 'Google': ['pixel'], 'Huawei': ['p20', 'p30', 'p40', 'p50', 'p60', 'mate', 'nova'], 'OnePlus': ['oneplus'], 'Sony': ['xperia'], 'Oppo': ['oppo', 'find', 'reno'], 'Asus': ['zenfone', 'rog'], 'Realme': ['realme'], 'Vivo': ['vivo'], 'Nokia': ['nokia'], 'Lenovo': ['legion'], 'Honor': ['honor'] };
+        const brandPriorityOrder = ['Xiaomi', 'Samsung', 'Apple', 'Motorola', 'Google', 'Huawei', 'OnePlus', 'Sony', 'Oppo', 'Asus', 'Realme', 'Vivo', 'Nokia', 'Lenovo', 'Honor'];
 
-    // --- Componente: Botão de Ação ---
-    const ActionButton = {
-        props: {
-            type: { type: String, default: 'button' },
-            bgColorClass: { type: String, default: 'bg-orange-500 hover:bg-orange-600' },
-            fullWidth: { type: Boolean, default: false },
-            disabled: { type: Boolean, default: false }
-        },
-        template: `
-            <button :type="type" :disabled="disabled" :class="[ 'inline-block px-6 py-3 mt-4 font-semibold text-white rounded-lg transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500', bgColorClass, { 'w-full': fullWidth, 'opacity-50 cursor-not-allowed': disabled }]">
-                <slot></slot>
-            </button>
-        `
-    };
-    
-    // --- Painel Genérico (Em Construção) ---
-     const GenericPanel = {
-        props: ['title'],
-        components: { MainCard },
-        template: `<main-card :title="title"><div class="text-center"><h4 class="text-2xl font-semibold text-slate-700">Em construção</h4><p class="text-slate-500 mt-2">Esta funcionalidade incrível será implementada em breve.</p></div></main-card>`
-    };
+        // --- FUNÇÕES DE LÓGICA E UTILITÁRIOS ---
+        const debounce = (func, wait) => { let timeout; return function executedFunction(...args) { const later = () => { clearTimeout(timeout); func(...args); }; clearTimeout(timeout); timeout = setTimeout(later, wait); }; };
+        
+        const getHistory = () => JSON.parse(localStorage.getItem('unifiedHistory')) || [];
+        
+        const saveToHistory = (entry) => {
+            if (!settings.saveHistory) return;
+            let history = getHistory();
+            history.unshift(entry);
+            history = history.slice(0, HISTORY_LIMIT);
+            localStorage.setItem('unifiedHistory', JSON.stringify(history));
+        };
+        
+        const formatRelativeTime = (isoString) => {
+            const date = new Date(isoString);
+            const now = new Date();
+            const seconds = Math.round((now - date) / 1000);
+            const minutes = Math.round(seconds / 60);
+            const hours = Math.round(minutes / 60);
+            const days = Math.round(hours / 24);
 
-    // --- Painel: Consultar IMEI ---
-    const ImeiPanel = {
-        components: { MainCard, ActionButton },
-        setup() {
-            const imei = ref('');
-            const resultMessage = ref('');
-            const error = ref('');
+            if (seconds < 60) return "agora mesmo";
+            if (minutes < 60) return `há ${minutes} min`;
+            if (hours < 24) return `há ${hours}h`;
+            if (days === 1) return "ontem";
+            if (days < 7) return `há ${days} dias`;
+            return `em ${date.toLocaleDateString('pt-BR')}`;
+        };
 
-            function handleSubmit() {
-                error.value = '';
-                resultMessage.value = '';
+        const displayHistory = () => {
+            historyList.innerHTML = '';
+            const history = getHistory();
 
-                const imeiStr = imei.value.trim();
+            if (history.length === 0) {
+                historyList.innerHTML = '<li class="text-zinc-500">Nenhuma busca realizada.</li>';
+                historyToggleContainer.innerHTML = '';
+                return;
+            }
+            
+            const groupedHistory = history.reduce((acc, entry) => {
+                const key = entry.value;
+                if (!acc[key]) acc[key] = [];
+                acc[key].push(entry);
+                return acc;
+            }, {});
 
-                if (!/^\d{14,15}$/.test(imeiStr)) {
-                    error.value = 'Por favor, insira um IMEI com 14 ou 15 dígitos.';
-                    return;
-                }
+            const uniqueEntryGroups = Object.values(groupedHistory);
+            const groupsToShow = isHistoryExpanded ? uniqueEntryGroups : uniqueEntryGroups.slice(0, COMPACT_HISTORY_LIMIT);
+            
+            groupsToShow.forEach(group => {
+                const mostRecentEntry = group[0];
+                const isDuplicateGroup = group.length > 1;
 
-                // Função para validar o IMEI usando o algoritmo de Luhn.
-                const isValidLuhn = (numStr) => {
-                    if (numStr.length !== 15) return false;
-                    let sum = 0;
-                    let alternate = false;
-                    for (let i = numStr.length - 1; i >= 0; i--) {
-                        let n = parseInt(numStr.charAt(i), 10);
-                        if (alternate) {
-                            n *= 2;
-                            if (n > 9) {
-                                n = (n % 10) + 1;
-                            }
-                        }
-                        sum += n;
-                        alternate = !alternate;
-                    }
-                    return (sum % 10 === 0);
-                };
-
-                // Função para calcular o dígito verificador de um IMEI base (14 dígitos).
-                const calculateCheckDigit = (baseNum) => {
-                    if (baseNum.length !== 14) return null;
-                    let sum = 0;
-                    let alternate = true; // Começa dobrando o dígito mais à direita da base
-                    for (let i = baseNum.length - 1; i >= 0; i--) {
-                        let n = parseInt(baseNum.charAt(i), 10);
-                        if (alternate) {
-                            n *= 2;
-                            if (n > 9) {
-                                n = (n % 10) + 1;
-                            }
-                        }
-                        sum += n;
-                        alternate = !alternate;
-                    }
-                    return (sum * 9) % 10;
-                };
-
-                let finalImei = '';
+                const icon = mostRecentEntry.type === 'imei' ? `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-upc-scan" viewBox="0 0 16 16"><path d="M1.5 1a.5.5 0 0 0-.5.5v3a.5.5 0 0 1-1 0v-3A1.5 1.5 0 0 1 1.5 0h3a.5.5 0 0 1 0 1zM11 .5a.5.5 0 0 1 .5-.5h3A1.5 1.5 0 0 1 16 1.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 1-.5-.5M.5 11a.5.5 0 0 1 .5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 1 0 1h-3A1.5 1.5 0 0 1 0 14.5v-3a.5.5 0 0 1 .5-.5m15 0a.5.5 0 0 1 .5.5v3a1.5 1.5 0 0 1-1.5 1.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 1 .5-.5M3 4.5a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0zM6 4.5a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0zM8 4a.5.5 0 0 0-.5.5v7a.5.5 0 0 0 1 0v-7A.5.5 0 0 0 8 4m3 0.5a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0zm2 0a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0z"/></svg>` : `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-phone" viewBox="0 0 16 16"><path d="M11 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM5 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/><path d="M7 14s-1 0-1-1 1-4 1-4 1 3 1 4-1 1-1 1"/></svg>`;
+                const date = new Date(mostRecentEntry.timestamp);
+                const formattedDate = settings.dateFormat === 'relative' ? formatRelativeTime(mostRecentEntry.timestamp) : date.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
                 
-                if (imeiStr.length === 15) {
-                    if (isValidLuhn(imeiStr)) {
-                        finalImei = imeiStr;
-                        resultMessage.value = `IMEI válido: ${finalImei}. Redirecionando...`;
-                    } else {
-                        const base = imeiStr.slice(0, 14);
-                        const checkDigit = calculateCheckDigit(base);
-                        finalImei = base + checkDigit;
-                        resultMessage.value = `IMEI inválido. Corrigido para: ${finalImei}. Redirecionando...`;
-                    }
-                } else { // se o comprimento for 14
-                    const checkDigit = calculateCheckDigit(imeiStr);
-                    finalImei = imeiStr + checkDigit;
-                    resultMessage.value = `IMEI completado para: ${finalImei}. Redirecionando...`;
+                let additionalInfoHTML = '';
+                if (mostRecentEntry.type === 'device') additionalInfoHTML = `<div class="hidden group-hover:block text-xs text-zinc-500 mt-1 pl-8">Buscado em: <span class="font-medium capitalize">${mostRecentEntry.site}</span></div>`;
+                else if (mostRecentEntry.type === 'imei') {
+                    if (mostRecentEntry.originalImei) additionalInfoHTML = `<div class="hidden group-hover:block text-xs text-orange-600 mt-1 pl-8">Corrigido de: <span class="font-mono">${mostRecentEntry.originalImei}</span></div>`;
+                    else additionalInfoHTML = `<div class="hidden group-hover:block text-xs text-green-600 mt-1 pl-8">IMEI válido</div>`;
+                }
+                
+                let duplicatesHTML = '';
+                if (isDuplicateGroup) {
+                    const olderEntries = group.slice(1);
+                    duplicatesHTML = `<div id="duplicates-${mostRecentEntry.timestamp}" class="duplicates-container hidden pl-12 pr-4 pb-3 space-y-2">
+                        ${olderEntries.map(entry => {
+                            const olderDate = new Date(entry.timestamp);
+                            const olderFormattedDate = settings.dateFormat === 'relative' ? formatRelativeTime(entry.timestamp) : olderDate.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                            return `<div class="flex justify-between items-center text-xs text-zinc-500 border-t border-zinc-200/50 pt-2"><span>Buscado novamente</span><span>${olderFormattedDate}</span></div>`;
+                        }).join('')}
+                    </div>`;
                 }
 
-                if (finalImei) {
-                    window.open(`https://www.imei.info/?imei=${finalImei}`, '_blank');
-                }
-            }
+                const expandButtonHTML = isDuplicateGroup ? `<button class="expand-duplicates-btn text-xs text-blue-600 hover:underline" data-target="duplicates-${mostRecentEntry.timestamp}" data-count="${group.length - 1}">Ver ${group.length - 1} mais</button>` : '';
 
-            return { imei, resultMessage, error, handleSubmit };
-        },
-        template: `
-            <main-card title="Consultar IMEI">
-                <form @submit.prevent="handleSubmit">
-                    <label class="block text-sm font-medium text-slate-600">Número do IMEI</label>
-                    <input v-model="imei" type="text" placeholder="Digite o IMEI de 14 ou 15 dígitos" class="w-full px-4 py-3 mt-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500 transition" maxlength="15">
-                    <action-button type="submit" :full-width="true">Validar e Consultar</action-button>
-                </form>
-                <div v-if="resultMessage" class="mt-6 p-4 bg-green-100 text-green-700 rounded-lg">{{ resultMessage }}</div>
-                <div v-if="error" class="mt-6 p-4 bg-red-100 text-red-700 rounded-lg">{{ error }}</div>
-            </main-card>
-        `
-    };
-
-    // --- Painel: Consultar Dispositivo ---
-    const DispositivoPanel = {
-        components: { MainCard, ActionButton },
-        setup() {
-            const brand = ref('Samsung');
-            const model = ref('');
-            const brands = ['Samsung', 'Apple', 'Xiaomi', 'Motorola', 'Asus', 'Huawei', 'Realme', 'OnePlus', 'Nokia', 'Lenovo', 'LG', 'Sony', 'ZTE', 'Tecno', 'Vivo', 'Infinix', 'Oppo'];
-            const searchLinks = ref([]);
-
-            function handleSubmit() {
-                if (!model.value.trim()) return;
-                const modelSlug = model.value.toLowerCase().replace(/\s+/g, '-');
-                const brandSlug = brand.value.toLowerCase().replace(/\s+/g, '-');
-                const modelQuery = model.value.replace(/\s+/g, '+');
-                searchLinks.value = [
-                    { name: 'Kimovil', url: `https://www.kimovil.com/pt/onde-comprar-${brandSlug}-${modelSlug}` },
-                    { name: 'MaisCelular', url: `https://www.maiscelular.com.br/fichas-tecnicas/${brandSlug}/${modelSlug}/` },
-                    { name: 'GSMArena', url: `https://www.gsmarena.com/res.php3?sSearch=${modelQuery}` }
-                ];
-            }
-            return { brand, model, brands, searchLinks, handleSubmit };
-        },
-        template: `
-            <main-card title="Consultar Dispositivo">
-                <form @submit.prevent="handleSubmit">
-                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        <div>
-                            <label for="brand-select" class="block text-sm font-medium text-slate-600">Marca</label>
-                            <select v-model="brand" id="brand-select" class="w-full px-4 py-3 mt-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500 transition">
-                                <option v-for="b in brands" :key="b" :value="b">{{ b }}</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="model-input" class="block text-sm font-medium text-slate-600">Modelo</label>
-                            <input v-model="model" id="model-input" type="text" placeholder="Ex: Galaxy S24 Ultra" class="w-full px-4 py-3 mt-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500 transition">
+                const li = document.createElement('li');
+                li.className = "history-item-container bg-white/50 rounded-lg overflow-hidden transition-colors duration-200";
+                li.innerHTML = `
+                    <div class="history-item group" data-value="${mostRecentEntry.value}">
+                        <div class="p-3 flex items-center justify-between">
+                            <div class="flex items-center flex-1 min-w-0 cursor-pointer history-main-action" data-type="${mostRecentEntry.type}" data-value="${mostRecentEntry.value}" data-site="${mostRecentEntry.site || ''}" data-original-imei="${mostRecentEntry.originalImei || ''}">
+                                <span class="mr-3 text-zinc-500 shrink-0">${icon}</span>
+                                <div class="flex-1 truncate">
+                                    <span class="font-medium text-sm pointer-events-none">${mostRecentEntry.value}</span>
+                                    ${additionalInfoHTML}
+                                </div>
+                            </div>
+                            <div class="flex items-center pl-2">
+                                <div class="flex flex-col items-end mr-3 text-right">
+                                    <span class="text-xs text-zinc-400 pointer-events-none shrink-0">${formattedDate}</span>
+                                    ${expandButtonHTML}
+                                </div>
+                                <div class="flex items-center">
+                                   <button class="copy-history-btn p-1 text-zinc-400 hover:text-blue-600" title="Copiar">${copyIconSVG}</button>
+                                   <button class="delete-history-btn p-1 text-zinc-400 hover:text-red-600" title="Excluir">${deleteIconSVG}</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <action-button type="submit" :full-width="true">Buscar</action-button>
-                </form>
-                <div v-if="searchLinks.length" class="mt-8">
-                    <h4 class="text-xl font-semibold text-slate-700 border-b border-slate-200 pb-3 mb-4">Opções de Pesquisa para {{ brand }} {{ model }}</h4>
-                    <div class="flex flex-col md:flex-row gap-4 mt-4">
-                        <a v-for="link in searchLinks" :key="link.name" :href="link.url" target="_blank" class="action-button flex-1 text-center !mt-0">{{ link.name }}</a>
-                    </div>
-                </div>
-            </main-card>
-        `
-    };
-
-    // --- Painel: Consultar Portabilidade ---
-    const PortabilidadePanel = {
-        components: { MainCard, ActionButton },
-        setup() {
-            const numero = ref('');
-            const loading = ref(false);
-            const result = ref(null);
-            const error = ref('');
-
-            const formattedNumero = computed({
-                get: () => numero.value,
-                set: (val) => {
-                    let v = val.replace(/\D/g, '').slice(0, 11);
-                    if (v.length > 2) v = `(${v.slice(0, 2)}) ${v.slice(2)}`;
-                    if (v.length > 9) v = `${v.slice(0, 9)}-${v.slice(9)}`;
-                    numero.value = v;
-                }
+                    ${duplicatesHTML}`;
+                historyList.appendChild(li);
             });
 
-            async function handleSubmit() {
-                const numOnly = numero.value.replace(/\D/g, '');
-                if (numOnly.length < 10) {
-                    error.value = 'Por favor, insira um número válido com DDD.';
+            if (uniqueEntryGroups.length > COMPACT_HISTORY_LIMIT) {
+                historyToggleContainer.innerHTML = `<button id="toggle-history-view" class="text-sm text-blue-600 hover:underline">${isHistoryExpanded ? 'Recolher' : 'Mostrar todo o histórico'}</button>`;
+            } else {
+                historyToggleContainer.innerHTML = '';
+            }
+        };
+        
+        const switchView = (viewName) => {
+            mainView.classList.toggle('hidden', viewName !== 'main');
+            settingsView.classList.toggle('hidden', viewName !== 'settings');
+            if (viewName === 'settings') {
+                isHistoryExpanded = false;
+                updateSettingsUI();
+                displayHistory();
+            } else if (viewName === 'main') {
+                loadSettings(); // Recarrega as configurações para garantir que a UI principal reaja corretamente.
+            }
+        };
+
+        const createSlug = (text) => text.toLowerCase().replace(/\s+/g, '-');
+        const createQuery = (text) => text.replace(/\s+/g, '+');
+        const luhnCalculate = (n) => (n.split('').reduce((s, d, i) => s + (i % 2 ? +d : [0, 2, 4, 6, 8, 1, 3, 5, 7, 9][d]), 0) * 9) % 10;
+        
+        const copyToClipboard = (text, button) => { const textArea = document.createElement("textarea"); textArea.value = text; textArea.style.position = "fixed"; textArea.style.left = "-9999px"; document.body.appendChild(textArea); textArea.select(); try { document.execCommand('copy'); const originalContent = button.innerHTML; button.innerHTML = 'Copiado!'; button.classList.add('text-green-600'); setTimeout(() => { button.innerHTML = originalContent; button.classList.remove('text-green-600'); }, 1500); } catch (err) { console.error('Falha ao copiar:', err); } finally { document.body.removeChild(textArea); } };
+        const redirectToImeiInfo = (imei, originalImei = null) => { saveToHistory({ type: 'imei', value: imei, originalImei: originalImei, timestamp: new Date().toISOString() }); window.open(`https://www.imei.info/?imei=${imei}`, '_blank'); };
+        const redirectToDeviceSearch = (brand, model, site) => {
+            const brandSlug = createSlug(brand); const modelSlug = createSlug(model); const modelQuery = createQuery(model); let url;
+            switch(site) {
+                case 'kimovil': url = `https://www.kimovil.com/pt/onde-comprar-${brandSlug}-${modelSlug}`; break;
+                case 'maiscelular': url = `https://www.maiscelular.com.br/fichas-tecnicas/${brandSlug}/${modelSlug}/`; break;
+                case 'gsmarena': url = `https://www.gsmarena.com/res.php3?sSearch=${modelQuery}`; break;
+            }
+            if (url) { saveToHistory({ type: 'device', value: `${brand} ${model}`, site: site, timestamp: new Date().toISOString() }); window.open(url, '_blank'); }
+        };
+        const identifyBrand = (model) => { const modelLower = model.toLowerCase(); for (const brand of brandPriorityOrder) { if (modelLower.startsWith(brand.toLowerCase())) return brand; } for (const brand of brandPriorityOrder) { const keywords = brandKeywords[brand]; if (keywords.some(keyword => modelLower.includes(keyword))) return brand; } return null; };
+        
+        const getImeiActionDetails = (value) => {
+            const result = { imeiToSearch: value, originalImei: null, feedbackMessage: '', feedbackIcon: '', colorClass: '', canSearch: false };
+            if (!/^\d{14,15}$/.test(value)) return result;
+
+            const isValid = value.length === 15 && (Number(value[14]) === luhnCalculate(value.substring(0, 14)));
+
+            if (settings.suggestImeiCorrection) {
+                result.canSearch = true;
+                if (value.length === 14) {
+                    result.imeiToSearch = value + luhnCalculate(value);
+                    result.originalImei = value;
+                    result.feedbackMessage = `IMEI sugerido: <strong class="font-mono">${result.imeiToSearch}</strong>`;
+                    result.colorClass = 'text-blue-600';
+                    result.feedbackIcon = infoCircleIconSVG;
+                } else if (isValid) {
+                    result.feedbackMessage = `IMEI válido.`;
+                    result.colorClass = 'text-green-600';
+                    result.feedbackIcon = checkCircleIconSVG;
+                } else {
+                    result.imeiToSearch = value.substring(0, 14) + luhnCalculate(value.substring(0, 14));
+                    result.originalImei = value;
+                    result.feedbackMessage = `IMEI inválido. Corrigido para <strong class="font-mono">${result.imeiToSearch}</strong>`;
+                    result.colorClass = 'text-orange-600';
+                    result.feedbackIcon = warningCircleIconSVG;
+                }
+            } else {
+                if (value.length !== 15) {
+                    result.feedbackMessage = `IMEI deve ter 15 dígitos.`;
+                    result.colorClass = 'text-red-600';
+                    result.feedbackIcon = warningCircleIconSVG;
+                } else if (isValid) {
+                    result.feedbackMessage = `IMEI válido.`;
+                    result.colorClass = 'text-green-600';
+                    result.feedbackIcon = checkCircleIconSVG;
+                    result.canSearch = true;
+                } else {
+                    result.feedbackMessage = `IMEI inválido.`;
+                    result.colorClass = 'text-red-600';
+                    result.feedbackIcon = warningCircleIconSVG;
+                }
+            }
+            return result;
+        };
+        
+        const handleSearchLogic = (value) => {
+            try {
+                selectedSuggestionIndex = -1;
+                if (/^\d*$/.test(value)) { searchInput.setAttribute('maxlength', '15'); } else { searchInput.removeAttribute('maxlength'); }
+
+                if (!value.trim()) {
+                    autocompleteContainer.classList.remove('opacity-100', 'scale-100', 'pointer-events-auto');
+                    autocompleteContainer.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
+                    searchInput.setAttribute('aria-expanded', 'false');
                     return;
                 }
-                loading.value = true;
-                result.value = null;
-                error.value = '';
-                try {
-                    // A chamada de API real está aqui.
-                    // Este endpoint é uma rede local e não funciona fora do ambiente da Brisanet.
-                    // O código está preparado para a chamada real, mas pode resultar em erro de rede.
-                    const response = await fetch(`http://172.26.50.141:800/operadora?num=${numOnly}`);
-                    
-                    if (!response.ok) {
-                        // Se a API falhar, vai direto para o catch.
-                        throw new Error(`Falha na consulta: ${response.status} ${response.statusText}`);
+
+                let suggestionsHTML = '';
+
+                if (/[a-zA-Z]/.test(value)) {
+                    let historySuggestions = [];
+                    if (settings.showPastSearches) {
+                        historySuggestions = getHistory().filter(entry => entry.type === 'device' && entry.value.toLowerCase().includes(value.toLowerCase())).map(entry => {
+                            const [brand, ...modelParts] = entry.value.split(' ');
+                            return { brand, model: modelParts.join(' '), isHistory: true, site: entry.site };
+                        });
                     }
-                    
-                    const data = await response.json();
-                    result.value = data;
 
-                } catch (e) {
-                    // Tratamento de erro de rede ou falha na API.
-                    error.value = 'Não foi possível consultar o número. Verifique sua conexão ou tente novamente mais tarde.';
-                    console.error("Erro ao consultar portabilidade:", e);
-                } finally {
-                    loading.value = false;
+                    const typedBrand = identifyBrand(value);
+                    const inferredBrand = typedBrand || 'Dispositivo';
+                    let modelOnly = value;
+                    if (typedBrand && value.toLowerCase().startsWith(typedBrand.toLowerCase())) {
+                        modelOnly = value.substring(typedBrand.length).trim();
+                    }
+                    const genericSuggestion = { brand: inferredBrand, model: modelOnly, isHistory: false, site: null };
+                    if (typedBrand) {
+                        historySuggestions = historySuggestions.filter(sugg => sugg.brand === typedBrand);
+                    }
+                    const allSuggestions = [...new Map([...historySuggestions, genericSuggestion].map(item => [(item.brand + " " + item.model).toLowerCase(), item])).values()];
+
+                    if (allSuggestions.length > 0) {
+                        const enabledSites = settings.searchSources.filter(s => s.enabled).map(s => s.id);
+                        allSuggestions.forEach(device => {
+                            const modelName = device.model.trim();
+                            if (!modelName) return;
+                            const fullName = device.brand.toLowerCase() === 'dispositivo' || modelName.toLowerCase().startsWith(device.brand.toLowerCase()) ? modelName : `${device.brand} ${modelName}`;
+                            const icon = device.isHistory ? historyIconSVG : searchIconSVG;
+                            enabledSites.forEach(site => {
+                                suggestionsHTML += `<div class="suggestion-item p-3 px-4 flex items-center cursor-pointer border-b border-zinc-100 last:border-b-0 hover:bg-blue-50 transition-colors duration-150" data-brand="${device.brand}" data-model="${modelName}" data-site="${site.toLowerCase()}">${icon}<span>Buscar <strong>${fullName}</strong> em <em>${ALL_SITES[site]}</em></span></div>`;
+                            });
+                        });
+                    }
+                } else if (/^\d{14,15}$/.test(value)) {
+                    const imeiDetails = getImeiActionDetails(value);
+                    suggestionsHTML = `<div class="p-4 text-sm ${imeiDetails.colorClass} flex items-center justify-center">${imeiDetails.feedbackIcon}<span class="ml-2">${imeiDetails.feedbackMessage}</span><button class="copy-feedback-btn ml-2 p-1 text-zinc-400 hover:text-blue-600" data-text="${imeiDetails.imeiToSearch}" title="Copiar">${copyIconSVG}</button></div><div class="text-xs text-zinc-500 text-center pb-2">Pressione Enter para consultar</div>`;
                 }
+
+                if(suggestionsHTML){
+                    autocompleteContainer.innerHTML = suggestionsHTML;
+                    autocompleteContainer.classList.add('opacity-100', 'scale-100', 'pointer-events-auto');
+                    autocompleteContainer.classList.remove('opacity-0', 'scale-95', 'pointer-events-none');
+                    searchInput.setAttribute('aria-expanded', 'true');
+                } else {
+                     autocompleteContainer.classList.remove('opacity-100', 'scale-100', 'pointer-events-auto');
+                    autocompleteContainer.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
+                    searchInput.setAttribute('aria-expanded', 'false');
+                }
+
+            } catch (error) {
+                console.error("Erro na busca:", error);
+                autocompleteContainer.innerHTML = `<div class="p-4 text-center text-sm text-red-600">Ocorreu um erro. Tente novamente.</div>`;
+                autocompleteContainer.classList.add('opacity-100', 'scale-100', 'pointer-events-auto');
+                autocompleteContainer.classList.remove('opacity-0', 'scale-95', 'pointer-events-none');
+            }
+        };
+        const debouncedSearch = debounce(handleSearchLogic, DEBOUNCE_DELAY);
+
+        // --- MANIPULADORES DE EVENTOS ---
+        const handleKeydown = (e) => {
+            const isAutocompleteVisible = !autocompleteContainer.classList.contains('opacity-0');
+
+            if (isAutocompleteVisible && autocompleteContainer.querySelector('.suggestion-item')) {
+                const suggestions = autocompleteContainer.querySelectorAll('.suggestion-item');
+                if (e.key === 'ArrowDown') { e.preventDefault(); if(selectedSuggestionIndex < suggestions.length -1) { selectedSuggestionIndex++; suggestions.forEach(s => s.classList.remove('selected')); suggestions[selectedSuggestionIndex].classList.add('selected'); } }
+                else if (e.key === 'ArrowUp') { e.preventDefault(); if(selectedSuggestionIndex > 0) { selectedSuggestionIndex--; suggestions.forEach(s => s.classList.remove('selected')); suggestions[selectedSuggestionIndex].classList.add('selected'); } }
             }
 
-            return { formattedNumero, loading, result, error, handleSubmit };
-        },
-        template: `
-            <main-card title="Consultar Portabilidade" subtitle="Verifique a operadora de um número de telefone.">
-                <form @submit.prevent="handleSubmit">
-                    <label class="block text-sm font-medium text-slate-600">Número de Telefone</label>
-                    <input v-model="formattedNumero" type="text" placeholder="(XX) XXXXX-XXXX" class="w-full px-4 py-3 mt-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500 transition">
-                    <action-button type="submit" :full-width="true" :disabled="loading">
-                        <span v-if="!loading">Consultar</span>
-                        <span v-else class="flex items-center justify-center">
-                            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                            Consultando...
-                        </span>
-                    </action-button>
-                </form>
-                <div v-if="error" class="mt-6 p-4 bg-red-100 text-red-700 rounded-lg">{{ error }}</div>
-                <div v-if="result" class="mt-8 border-t pt-6">
-                    <h4 class="text-xl font-semibold text-slate-700 mb-4">Resultado da Consulta</h4>
-                    <ul class="space-y-3">
-                        <li class="flex justify-between p-3 bg-slate-50 rounded-lg"><strong>Número:</strong> <span>{{ result.numero }}</span></li>
-                        <li class="flex justify-between p-3 bg-slate-50 rounded-lg"><strong>Operadora:</strong> <span class="font-bold text-orange-600">{{ result.operadora }}</span></li>
-                        <li class="flex justify-between p-3 bg-slate-50 rounded-lg"><strong>Tipo de Linha:</strong> <span>{{ result.tipo }}</span></li>
-                        <li class="flex justify-between p-3 bg-slate-50 rounded-lg"><strong>Status:</strong> <span>{{ result.status }}</span></li>
-                    </ul>
-                </div>
-            </main-card>
-        `
-    };
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (settings.enterAction === 'none') return;
 
-    // --- Painel: Brisa Keep (Notas) ---
-    const BrisaKeepPanel = {
-        components: { MainCard, ActionButton, SvgIcon },
-        setup() {
-            const notes = ref([]);
-            const newNote = ref({ title: '', content: '', type: 'text', todos: [], color: 'bg-white', pinned: false });
-            const storageKey = 'brisatel-vue-notes-enhanced';
-            const colorPalette = ['bg-white', 'bg-red-200', 'bg-blue-200', 'bg-green-200', 'bg-yellow-200', 'bg-purple-200'];
-            const filter = ref('');
-            const showArchived = ref(false);
+                const value = searchInput.value.trim();
+                const imeiDetails = getImeiActionDetails(value);
 
-            onMounted(() => { notes.value = JSON.parse(localStorage.getItem(storageKey) || '[]'); });
+                if (imeiDetails.canSearch) {
+                    redirectToImeiInfo(imeiDetails.imeiToSearch, imeiDetails.originalImei);
+                    return; 
+                }
+
+                if (selectedSuggestionIndex > -1) {
+                    const selected = autocompleteContainer.querySelector('.suggestion-item.selected');
+                    if (selected) { selected.click(); return; }
+                }
+
+                if (settings.enterAction === 'first' && autocompleteContainer.querySelector('.suggestion-item')) {
+                    autocompleteContainer.querySelector('.suggestion-item').click();
+                    return;
+                }
+                
+                if (settings.enterAction === 'smart' && value && !/^\d+$/.test(value)) {
+                    const brand = identifyBrand(value) || 'Dispositivo';
+                    const defaultSite = (settings.searchSources.find(s => s.enabled) || {id: 'gsmarena'}).id;
+                    redirectToDeviceSearch(brand, value, defaultSite);
+                }
+            }
+        };
+        const handleAutocompleteClick = (e) => {
+            const suggestionItem = e.target.closest('.suggestion-item'); if (suggestionItem) { const { brand, model, site } = suggestionItem.dataset; redirectToDeviceSearch(brand, model, site); autocompleteContainer.style.display = 'none'; searchInput.value = `${brand} ${model}`; }
+            const copyBtn = e.target.closest('.copy-feedback-btn'); if(copyBtn) { copyToClipboard(copyBtn.dataset.text, copyBtn); }
+        };
+        const handleMenuClick = (e) => {
+            e.preventDefault(); 
+            const inactiveClasses = ['text-zinc-600', 'hover:bg-zinc-100']; 
+            const activeClasses = ['bg-blue-50', 'font-semibold', 'text-blue-700'];
+            menuItems.forEach(i => { i.classList.remove(...activeClasses); i.classList.add(...inactiveClasses); }); 
+            e.currentTarget.classList.remove(...inactiveClasses); 
+            e.currentTarget.classList.add(...activeClasses); 
+            switchView(e.currentTarget.dataset.view);
+        };
+        
+        const handleSettingsChange = (e) => {
+            const { name, type, value, checked, id } = e.target;
+            let settingKey;
+
+            if (name === 'enter-action') settingKey = 'enterAction';
+            else if (name === 'date-format') settingKey = 'dateFormat';
+            else if (id === 'setting-suggest-imei') settingKey = 'suggestImeiCorrection';
+            else if (id === 'setting-save-history') settingKey = 'saveHistory';
+            else if (id === 'setting-show-past') settingKey = 'showPastSearches';
+            else if (id === 'setting-secure-delete') settingKey = 'secureHistoryDeletion';
+            else if (name.startsWith('source-')) {
+                const sourceId = name.split('-')[1];
+                const source = settings.searchSources.find(s => s.id === sourceId);
+                if (source) source.enabled = checked;
+                saveSettings(settings);
+                return;
+            }
+
+            if (settingKey) {
+                settings[settingKey] = (type === 'checkbox') ? checked : value;
+            }
             
-            watch(notes, saveNotes, { deep: true });
+            saveSettings(settings);
+            if (name === 'date-format') {
+                displayHistory();
+            }
+        };
 
-            function saveNotes() { localStorage.setItem(storageKey, JSON.stringify(notes.value)); }
+        // --- GESTÃO DE AJUSTES ---
+        const saveSettings = (newSettings) => localStorage.setItem('unifiedSettings', JSON.stringify(newSettings));
+        const loadSettings = () => {
+            const defaults = { enterAction: 'smart', suggestImeiCorrection: true, searchSources: Object.keys(ALL_SITES).map(id => ({id, enabled: true})), saveHistory: true, showPastSearches: true, dateFormat: 'absolute', secureHistoryDeletion: true };
+            const stored = JSON.parse(localStorage.getItem('unifiedSettings'));
+            settings = { ...defaults, ...stored };
+            if (!stored || !stored.searchSources) {
+                settings.searchSources = defaults.searchSources;
+            } else {
+                 settings.searchSources = Object.keys(ALL_SITES).map(id => {
+                    const storedSource = stored.searchSources.find(s => s.id === id);
+                    return { id, enabled: storedSource ? storedSource.enabled : true };
+                });
+            }
+        };
+        const updateSettingsUI = () => {
+            settingsElements.enterAction.forEach(radio => radio.checked = radio.value === settings.enterAction);
+            settingsElements.suggestImeiCorrection.checked = settings.suggestImeiCorrection;
+            settings.searchSources.forEach(source => { const chk = document.getElementById(`source-${source.id}`); if (chk) chk.checked = source.enabled; });
+            settingsElements.saveHistory.checked = settings.saveHistory;
+            settingsElements.showPastSearches.checked = settings.showPastSearches;
+            settingsElements.dateFormat.forEach(radio => radio.checked = radio.value === settings.dateFormat);
+            settingsElements.secureHistoryDeletion.checked = settings.secureHistoryDeletion;
+        };
+        const buildSearchSourcesUI = () => {
+            let html = '';
+            settings.searchSources.forEach(source => {
+                html += `<div class="flex items-center"><input id="source-${source.id}" name="source-${source.id}" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"><label for="source-${source.id}" class="ml-3 text-sm text-zinc-600">${ALL_SITES[source.id]}</label></div>`;
+            });
+            settingsElements.searchSources.innerHTML = html;
+        };
+        
+        // --- INICIALIZAÇÃO DA APLICAÇÃO ---
+        function initializeEventListeners() {
+            searchInput.addEventListener('input', () => debouncedSearch(searchInput.value));
+            searchInput.addEventListener('focus', () => handleSearchLogic(searchInput.value));
+            searchInput.addEventListener('keydown', handleKeydown);
+            autocompleteContainer.addEventListener('click', handleAutocompleteClick);
+            document.addEventListener('click', e => { 
+                if (!searchContainer.contains(e.target)) {
+                    autocompleteContainer.classList.remove('opacity-100', 'scale-100', 'pointer-events-auto');
+                    autocompleteContainer.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
+                    searchInput.setAttribute('aria-expanded', 'false');
+                }
+            });
             
-            const filteredNotes = computed(() => {
-                return notes.value.filter(note => {
-                    const matchesSearch = filter.value ? (note.title.toLowerCase().includes(filter.value.toLowerCase()) || note.content.toLowerCase().includes(filter.value.toLowerCase())) : true;
-                    const matchesArchive = showArchived.value ? note.archived : !note.archived;
-                    return matchesSearch && matchesArchive;
-                }).sort((a, b) => (b.pinned - a.pinned) || (b.id - a.id));
+            clearHistoryBtn.addEventListener('click', () => { 
+                if (settings.secureHistoryDeletion) {
+                    modal.container.classList.remove('hidden');
+                } else {
+                    localStorage.removeItem('unifiedHistory');
+                    displayHistory(); 
+                }
+            });
+            modal.cancelBtn.addEventListener('click', () => modal.container.classList.add('hidden'));
+            modal.confirmBtn.addEventListener('click', () => {
+                 localStorage.removeItem('unifiedHistory');
+                 displayHistory(); 
+                 modal.container.classList.add('hidden');
             });
 
-            function addNote() {
-                if (newNote.value.content.trim() === '' && newNote.value.todos.every(t => t.text.trim() === '')) return;
-                notes.value.unshift({ ...newNote.value, id: Date.now(), archived: false, createdAt: new Date() });
-                newNote.value = { title: '', content: '', type: 'text', todos: [], color: 'bg-white', pinned: false };
-            }
-            function deleteNote(id) { notes.value = notes.value.filter(note => note.id !== id); }
-            function togglePin(id) { const note = notes.value.find(n => n.id === id); if(note) note.pinned = !note.pinned; }
-            function toggleArchive(id) { const note = notes.value.find(n => n.id === id); if(note) note.archived = !note.archived; }
-            function changeColor(id, color) { const note = notes.value.find(n => n.id === id); if(note) note.color = color; }
-            function addTodo() { if (newNote.value.todos.length === 0 || newNote.value.todos[newNote.value.todos.length - 1].text.trim() !== '') { newNote.value.todos.push({ text: '', done: false }); } }
-
-            return { notes, newNote, addNote, deleteNote, colorPalette, filteredNotes, filter, togglePin, toggleArchive, changeColor, addTodo, showArchived };
-        },
-        template: `
-            <div>
-                <main-card title="Brisa Keep" subtitle="Capture ideias, crie listas e nunca se esqueça de nada.">
-                    <div class="max-w-xl mx-auto">
-                        <form @submit.prevent="addNote" class="bg-white p-4 rounded-lg shadow-md border">
-                            <input v-model="newNote.title" type="text" placeholder="Título" class="w-full p-2 text-lg font-semibold focus:outline-none bg-transparent">
-                            <div v-if="newNote.type === 'text'">
-                                <textarea v-model="newNote.content" placeholder="Criar uma nota..." rows="3" class="w-full p-2 mt-2 focus:outline-none bg-transparent"></textarea>
-                            </div>
-                            <div v-if="newNote.type === 'list'" class="mt-2 space-y-2">
-                                <div v-for="(todo, index) in newNote.todos" :key="index" class="flex items-center gap-2">
-                                    <input type="checkbox" v-model="todo.done" disabled>
-                                    <input v-model="todo.text" @keydown.enter.prevent="addTodo" type="text" placeholder="Item da lista" class="w-full focus:outline-none bg-transparent">
-                                </div>
-                                <button @click.prevent="addTodo" class="text-slate-500 hover:text-slate-800 ml-6">+ Adicionar item</button>
-                            </div>
-                            <div class="flex justify-between items-center mt-2">
-                                <div class="flex gap-2 items-center">
-                                    <button @click.prevent="newNote.type = 'text'" :class="{'bg-slate-200': newNote.type === 'text'}" class="p-2 rounded-full hover:bg-slate-100"><svg-icon path="M3 12h18M3 6h18M3 18h18" /></button>
-                                    <button @click.prevent="newNote.type = 'list'" :class="{'bg-slate-200': newNote.type === 'list'}" class="p-2 rounded-full hover:bg-slate-100"><svg-icon path="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></button>
-                                </div>
-                                <action-button type="submit" class="!mt-0">Adicionar</action-button>
-                            </div>
-                        </form>
-                    </div>
-                </main-card>
-
-                <div class="mt-8 flex justify-between items-center">
-                    <input v-model="filter" type="text" placeholder="Buscar notas..." class="w-full md:w-1/3 px-4 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500">
-                    <button @click="showArchived = !showArchived" class="px-4 py-2 rounded-lg text-slate-600 hover:bg-slate-200">{{ showArchived ? 'Ver Ativas' : 'Ver Arquivadas' }}</button>
-                </div>
-
-                <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    <div v-for="note in filteredNotes" :key="note.id" :class="[note.color, 'p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between break-words relative hover:shadow-lg transition-shadow']">
-                        <div>
-                            <button @click="togglePin(note.id)" class="absolute top-3 right-3 p-1 text-slate-500 hover:text-orange-500 rounded-full transition-colors">
-                                <svg-icon :class="{'text-orange-500 fill-current': note.pinned}" path="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                            </button>
-                            <h4 class="text-md font-bold text-slate-800 mb-2 pr-8">{{ note.title || 'Nota sem título' }}</h4>
-                            <div v-if="note.type === 'text'" class="text-sm text-slate-700 whitespace-pre-wrap">{{ note.content }}</div>
-                            <div v-if="note.type === 'list'" class="space-y-2 mt-2">
-                                <div v-for="(todo, i) in note.todos" :key="i" class="flex items-center gap-2">
-                                    <input type="checkbox" v-model="todo.done" class="form-checkbox rounded text-orange-500">
-                                    <span :class="{'line-through text-slate-500': todo.done}">{{ todo.text }}</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between mt-4">
-                            <div class="flex gap-1">
-                                <button @click.prevent="toggleArchive(note.id)" class="p-2 text-slate-500 hover:bg-slate-300/50 rounded-full"><svg-icon :path="note.archived ? 'M5 10l7-7m0 0l7 7m-7-7v18' : 'M19 9l-7 7-7-7'" /></button>
-                                <button @click.prevent="deleteNote(note.id)" class="p-2 text-slate-500 hover:bg-slate-300/50 rounded-full"><svg-icon path="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></button>
-                            </div>
-                            <div class="text-xs text-slate-500">{{ new Date(note.createdAt).toLocaleDateString() }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `
-    };
-    
-    //  APLICAÇÃO PRINCIPAL ========================================================
-    createApp({
-        components: {
-            Sidebar, ImeiPanel, DispositivoPanel, PortabilidadePanel, BrisaKeepPanel, GenericPanel
-        },
-        setup() {
-            const activePanel = ref('imei');
-            const isSidebarOpen = ref(false);
-
-            const navigationItems = ref([
-                {
-                    title: 'Ferramentas',
-                    items: [
-                        { id: 'imei', name: 'Consultar IMEI', iconPath: 'M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-1.096.904-2.39.904-3.732a8 8 0 10-14.708 4.28c.16.05.32.1.48.15' },
-                        { id: 'dispositivo', name: 'Consultar Dispositivo', iconPath: 'M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z' },
-                        { id: 'portabilidade', name: 'Consultar Portabilidade', iconPath: 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4' },
-                        { id: 'brisa-keep', name: 'Brisa Keep', iconPath: 'M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z' },
-                    ]
+            historyList.addEventListener('click', (e) => {
+                const container = e.target.closest('.history-item-container');
+                const expandBtn = e.target.closest('.expand-duplicates-btn');
+                if (expandBtn) {
+                    e.preventDefault();
+                    const targetId = expandBtn.dataset.target;
+                    const targetElement = document.getElementById(targetId);
+                    if (targetElement) {
+                        const isHidden = targetElement.classList.toggle('hidden');
+                        expandBtn.textContent = isHidden ? `Ver ${expandBtn.dataset.count} mais` : 'Recolher';
+                    }
+                    return;
                 }
-            ]);
 
-            const panelMap = {
-                'imei': 'ImeiPanel',
-                'dispositivo': 'DispositivoPanel',
-                'portabilidade': 'PortabilidadePanel',
-                'brisa-keep': 'BrisaKeepPanel',
-            };
-
-            const activePanelComponent = computed(() => panelMap[activePanel.value] || 'GenericPanel');
-            const activePanelTitle = computed(() => {
-                for (const section of navigationItems.value) {
-                    const item = section.items.find(i => i.id === activePanel.value);
-                    if (item) return item.name;
+                const mainAction = e.target.closest('.history-main-action');
+                if(mainAction){
+                    if(container) {
+                        container.classList.add('bg-blue-100');
+                        setTimeout(() => container.classList.remove('bg-blue-100'), 200);
+                    }
+                    setTimeout(() => {
+                        const { type, value, site, originalImei } = mainAction.dataset; 
+                        if (type === 'imei') { redirectToImeiInfo(value, originalImei || null); } 
+                        else if (type === 'device') { const [brand, ...modelParts] = value.split(' '); const model = modelParts.join(' '); redirectToDeviceSearch(brand, model, site); }
+                    }, 100);
+                    return;
                 }
-                return 'BrisaTel';
+
+                const deleteBtn = e.target.closest('.delete-history-btn');
+                if (deleteBtn) {
+                    const valueToDelete = e.target.closest('.history-item').dataset.value;
+                    let history = getHistory().filter(item => item.value !== valueToDelete);
+                    localStorage.setItem('unifiedHistory', JSON.stringify(history));
+                    displayHistory();
+                    return;
+                }
+
+                const copyBtn = e.target.closest('.copy-history-btn');
+                if (copyBtn) {
+                    const valueToCopy = e.target.closest('.history-item').dataset.value;
+                    copyToClipboard(valueToCopy, copyBtn);
+                    return;
+                }
             });
-            
-            function handleNavigation(panelId) {
-                activePanel.value = panelId;
-                isSidebarOpen.value = false;
-            }
 
-            return { activePanel, navigationItems, handleNavigation, activePanelComponent, isSidebarOpen, activePanelTitle };
+            historyToggleContainer.addEventListener('click', (e) => {
+                if(e.target.id === 'toggle-history-view') {
+                    isHistoryExpanded = !isHistoryExpanded;
+                    displayHistory();
+                }
+            });
+
+            menuItems.forEach(item => item.addEventListener('click', handleMenuClick));
+            settingsView.addEventListener('change', handleSettingsChange);
         }
-    }).mount('#app');
+        
+        function initializeApp() {
+            loadSettings();
+            buildSearchSourcesUI();
+            initializeEventListeners();
+            document.querySelector('.menu-item[data-view="main"]').click();
+        }
 
-</script>
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
 </body>
 </html>
